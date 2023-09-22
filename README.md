@@ -1,7 +1,7 @@
 # Anroid Git Hub 최초 다운로드법
 1. File -> New -> Project from version Control...
 2. URL에 
-https://github.com/Android-MADA/MADA_ALL.git
+https://github.com/qjatn0521/KWOpenSource10Team.git
  넣고 Clone 버튼 클릭
 # Android 브랜치 생성 (최초 1회만)
 1. Git -> New Branch -> 닉네임 입력후 Create
