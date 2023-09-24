@@ -29,8 +29,8 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    buildFeatures {
-        viewBinding = true
+    viewBinding {
+        enable = true
     }
 }
 
@@ -46,4 +46,14 @@ dependencies {
     //바텀 네비게이션을 쓰기 위한 마테리얼 다자인
     implementation("androidx.navigation:navigation-fragment:2.3.3")
     implementation("androidx.navigation:navigation-ui:2.3.3")
+    //OKHttp3
+    implementation ("androidx.preference:preference:1.1.1")
+    implementation ("io.reactivex.rxjava2:rxjava:2.1.1")
+    implementation ("io.reactivex.rxjava2:rxandroid:2.1.1")
+    implementation ("com.squareup.retrofit2:retrofit:2.3.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.3.0")
+    implementation ("com.squareup.retrofit2:adapter-rxjava2:2.3.0")
+    implementation ("androidx.lifecycle:lifecycle-extensions:2.2.0")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
+    implementation ("android.arch.lifecycle:extensions:1.1.1")
 }
