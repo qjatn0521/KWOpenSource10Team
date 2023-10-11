@@ -5,6 +5,8 @@ import android.util.Log;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import com.example.myapplication.sports.data.ApiClient;
+import com.example.myapplication.sports.model.Fixture;
+import com.example.myapplication.sports.model.FixtureResponse;
 import com.example.myapplication.sports.model.Team;
 import com.example.myapplication.sports.model.TeamResponse;
 
@@ -50,6 +52,29 @@ public class TeamViewModel extends ViewModel {
 
     public MutableLiveData<Boolean> getLoadingTeamList() {
         return loadingTeamList;
+    }
+
+    private MutableLiveData<List<Fixture>> fixtureList = new MutableLiveData<>();
+    private MutableLiveData<Boolean> loadingFixture = new MutableLiveData<>();
+
+    public void getAllFixtureOfLeague(int leagueId) {
+        loadingFixture.setValue(true);
+        disposable.add(apiClient.getAllFixtureOfLeague(leagueId)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableSingleObserver<FixtureResponse>() {
+                    @Override
+                    public void onSuccess(FixtureResponse t) {
+                        //fixtureList.setValue(t.getApi().getFixtures());
+                        loadingFixture.setValue(false);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+                })
+        );
     }
 
     @Override

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_noti"
+    android:gravity="center">
+
+    <ImageView
+        android:padding="10dp"
+        android:id="@+id/iv_img_resource"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    <TextView
+        android:layout_marginLeft="15dp"
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="팀 명" />
+
+    <ImageView
+        android:id="@+id/imageView4"
+        android:padding="25dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/image_arrow_bottom"/>
+
+</LinearLayout>

@@ -1,5 +1,6 @@
 package com.example.myapplication.sports.data;
 
+import com.example.myapplication.sports.model.FixtureResponse;
 import com.example.myapplication.sports.model.TeamResponse;
 import com.example.myapplication.sports.util.Constant;
 
@@ -12,6 +13,10 @@ public interface ApiService {
     @Headers(Constant.API_KEY)
     @GET(Constant.GET_ALL_TEAMS_OF_LEAGUE)
     Single<TeamResponse> getAllTeamsOfLeague(@Path("league_id") int leagueId);
+
+    @Headers(Constant.API_KEY)
+    @GET(Constant.GET_ALL_FIXTURE_OF_LEAGUE)
+    Single<FixtureResponse> getAllFixtureOfLeague(@Path("league_id") int leagueId);
 
     /*@Headers(Constant.API_KEY)
     @GET(Constant.GET_LEAGUE_TABLE)
@@ -31,9 +36,7 @@ public interface ApiService {
     @GET(Constant.GET_ALL_TRANSFERS_OF_TEAM)
     Single<TransferResponse> getAllTransfersOfTeam(@Path("team_id") int teamId);
 
-    @Headers(Constant.API_KEY)
-    @GET(Constant.GET_ALL_FIXTURE_OF_LEAGUE)
-    Single<FixtureResponse> getAllFixtureOfLeague(@Path("league_id") int leagueId);
+
 
     @Headers(Constant.API_KEY)
     @GET(Constant.GET_ALL_H2H_ITEMS)
