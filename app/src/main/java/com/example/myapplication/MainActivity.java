@@ -19,9 +19,6 @@ public class MainActivity extends AppCompatActivity {
     private FragmentManager fragmentManager;
 
 
-    Fragment fragmentAlarm;
-    Fragment fragmentNotification ;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
