@@ -1,5 +1,7 @@
 package com.example.myapplication.sports;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import androidx.annotation.Nullable;
@@ -13,6 +15,7 @@ import com.example.myapplication.R;
 import com.example.myapplication.databinding.ActivityNotiSportsBinding;
 import com.example.myapplication.sports.adapter.TeamAdapter;
 import com.example.myapplication.sports.model.Team;
+
 
 import java.util.List;
 
@@ -39,6 +42,8 @@ public class SportsActivity extends AppCompatActivity {
                 if (teams != null) {
                     for (Team data : teams) {
                         Log.d("logo",data.getLogo());
+
+
                         adapter.addItem(data);
                     }
                     rvTeam.setLayoutManager(layoutManager);
