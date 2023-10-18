@@ -61,6 +61,7 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         private TextView tvTitle;
         private ImageView imageResource;
+        private Bitmap bitmap;
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             //규칙2
@@ -71,18 +72,41 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
             tvTitle.setText(data.getName());
             URL url = new URL(data.getLogo());
 
-            // web에서 이미지를 가져와 ImageView에 저장할 Bitmap을 만든다.
-            HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-            conn.setDoInput(true); // 서버로부터 응답 수신
-            InputStream is;
-            try {
-                conn.connect(); //연결된 곳에 접속할 때 (connect() 호출해야 실제 통신 가능함)
-                is = conn.getInputStream(); //inputStream 값 가져오기
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            Thread uThread = new Thread() {
+                @Override
+                public void run() {
+                    try{
+                        // web에서 이미지를 가져와 ImageView에 저장할 Bitmap을 만든다.
+                        HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                        conn.setDoInput(true); // 서버로부터 응답 수신
+                        InputStream is= conn.getInputStream();;
+                        conn.connect();
+                        bitmap = BitmapFactory.decodeStream(is);
+
+                    }catch (MalformedURLException e){
+                        e.printStackTrace();
+                    }catch (IOException e){
+                        e.printStackTrace();
+                    }
+                }
+            };
+            uThread.start(); // 작업 Thread 실행
+
+            try{
+                //메인 Thread는 별도의 작업 Thread가 작업을 완료할 때까지 대기해야 한다.
+                //join() 호출하여 별도의 작업 Thread가 종료될 때까지 메인 Thread가 기다리도록 한다.
+                //join() 메서드는 InterruptedException을 발생시킨다.
+                uThread.join();
+
+                //작업 Thread에서 이미지를 불러오는 작업을 완료한 뒤
+                //UI 작업을 할 수 있는 메인 Thread에서 ImageView에 이미지 지정
+                imageResource.setImageBitmap(bitmap);
+            }catch (InterruptedException e){
+                e.printStackTrace();
             }
-            Bitmap bitmap = BitmapFactory.decodeStream(is);
-            imageResource.setImageBitmap(bitmap);
+
+
+
         }
     }
 }
