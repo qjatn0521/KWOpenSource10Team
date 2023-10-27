@@ -14,10 +14,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.R;
 import com.example.myapplication.databinding.ActivityNotiSportsBinding;
 import com.example.myapplication.sports.adapter.TeamAdapter;
+import com.example.myapplication.sports.model.Fixture;
 import com.example.myapplication.sports.model.Team;
 
 
 import java.util.List;
+import java.util.Objects;
 
 public class SportsActivity extends AppCompatActivity {
     private ActivityNotiSportsBinding binding;
@@ -32,8 +34,10 @@ public class SportsActivity extends AppCompatActivity {
 
         TeamViewModel viewModel = new ViewModelProvider(this).get(TeamViewModel.class);
         rvTeam=findViewById(R.id.soccre_recyclerview);
+
+        //팀 정보 얻어오기
         viewModel.getAllTeamsOfLeague(leagueId);
-        TeamAdapter adapter =new TeamAdapter();
+        TeamAdapter adapter =new TeamAdapter(viewModel);
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this);
         viewModel.getTeamsList().observe(this, new Observer<List<Team>>() {
             @Override
@@ -41,9 +45,6 @@ public class SportsActivity extends AppCompatActivity {
                 //Log.d("hi","thisis good");
                 if (teams != null) {
                     for (Team data : teams) {
-                        Log.d("logo",data.getLogo());
-
-
                         adapter.addItem(data);
                     }
                     rvTeam.setLayoutManager(layoutManager);
@@ -52,6 +53,9 @@ public class SportsActivity extends AppCompatActivity {
 
             }
         });
+        //리그 일정 얻어오기
+
+
 
 
     }

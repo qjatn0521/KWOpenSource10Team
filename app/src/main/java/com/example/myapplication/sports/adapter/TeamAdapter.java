@@ -2,16 +2,24 @@ package com.example.myapplication.sports.adapter;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.R;
+import com.example.myapplication.sports.TeamViewModel;
+import com.example.myapplication.sports.model.Fixture;
 import com.example.myapplication.sports.model.Team;
 
 import java.io.IOException;
@@ -19,12 +27,18 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Locale;
+
 public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder> {
 
     //리스트는 무조건 데이터를 필요로함
@@ -33,6 +47,12 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
         items.add(team);
     }
     //껍데기만 만듬. 1번 실행
+    public TeamViewModel viewModel; // Replace ViewModelType with the actual type of your ViewModel
+
+    // Constructor to accept the ViewModel
+    public TeamAdapter(TeamViewModel viewModel) {
+        this.viewModel = viewModel;
+    }
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -46,7 +66,7 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         Team data=items.get(position);
         try {
-            holder.setItem(data);
+            holder.setItem(data,viewModel);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -62,14 +82,55 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
         private TextView tvTitle;
         private ImageView imageResource;
         private Bitmap bitmap;
+        private Switch switchButton;
+        Calendar calendar = Calendar.getInstance();
+        Date currentDate = calendar.getTime();
+
+
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             //규칙2
             tvTitle=itemView.findViewById(R.id.tv_title);
             imageResource=itemView.findViewById(R.id.iv_img_resource);
+            switchButton = itemView.findViewById(R.id.switch1);
         }
-        public void setItem(Team data) throws IOException {
+        public void setItem(Team data,TeamViewModel viewModel) throws IOException {
             tvTitle.setText(data.getName());
+
+            switchButton.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if(isChecked) {
+                        viewModel.getAllFixtureOfTeam(data.getTeamId());
+                        viewModel.getFixtureList().observe((LifecycleOwner) itemView.getContext(), new Observer<List<Fixture>>() {
+                            @Override
+                            public void onChanged(List<Fixture> fixtures) {
+                                if(fixtures!=null) {
+                                    for(Fixture f : fixtures) {
+                                        try {
+                                            // 일자 문자열을 파싱
+                                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX",new Locale("ko", "KR"));
+                                            Date date = dateFormat.parse(f.getEventDate());
+
+                                            // 현재 날짜와 비교
+                                            if (date.after(currentDate)) {
+                                                String fixtureInfo = f.getFixtureInfoAsString();
+                                                Log.d("fix",fixtureInfo);
+                                            }
+                                        } catch (ParseException e) {
+                                            // 날짜 파싱 오류 처리
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+
+                            }
+                        });
+                    } else {
+
+                    }
+                }
+            });
             URL url = new URL(data.getLogo());
 
             Thread uThread = new Thread() {

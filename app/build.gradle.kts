@@ -56,4 +56,8 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-extensions:2.2.0")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
     implementation ("android.arch.lifecycle:extensions:1.1.1")
+
+    //Room DB 라이브러리
+    implementation ("androidx.room:room-runtime:2.2.6")
+    annotationProcessor ("androidx.room:room-compiler:2.2.6")
 }
