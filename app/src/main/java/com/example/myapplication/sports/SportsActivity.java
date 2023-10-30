@@ -2,6 +2,7 @@ package com.example.myapplication.sports;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import androidx.annotation.Nullable;
@@ -14,6 +15,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.R;
 import com.example.myapplication.databinding.ActivityNotiSportsBinding;
 import com.example.myapplication.sports.adapter.TeamAdapter;
+import com.example.myapplication.sports.database.FixtureDB;
+import com.example.myapplication.sports.database.FixtureDBDao;
+import com.example.myapplication.sports.database.FixtureDatabase;
 import com.example.myapplication.sports.model.Fixture;
 import com.example.myapplication.sports.model.Team;
 
@@ -42,9 +46,9 @@ public class SportsActivity extends AppCompatActivity {
         viewModel.getTeamsList().observe(this, new Observer<List<Team>>() {
             @Override
             public void onChanged(List<Team> teams) {
-                //Log.d("hi","thisis good");
                 if (teams != null) {
                     for (Team data : teams) {
+                        checkFixturesForTeamInBackground(data);
                         adapter.addItem(data);
                     }
                     rvTeam.setLayoutManager(layoutManager);
@@ -53,10 +57,19 @@ public class SportsActivity extends AppCompatActivity {
 
             }
         });
-        //리그 일정 얻어오기
+    }
+    private void checkFixturesForTeamInBackground(Team team) {
+        new AsyncTask<Void, Void, Integer>() {
+            @Override
+            protected Integer doInBackground(Void... voids) {
+                FixtureDBDao fixtureDao = FixtureDatabase.getInstance(SportsActivity.this).fixtureDao();
+                //Log.d("sub!!!!",team.getTeamId()+" "+fixtureDao.hasFixturesForTeam(team.getTeamId())+" "+team.getSub()+"");
+                if (fixtureDao.hasFixturesForTeam(team.getTeamId()) > 0) {
+                    team.setSub();
+                }
+                return 0;
+            }
 
-
-
-
+        }.execute();
     }
 }

@@ -9,5 +9,6 @@ public class FixtureDB {
     public int teamId;
     public String homeTeamName;
     public String awayTeamName;
-    public String eventDate;
+    public String date;
+    public String time;
 }

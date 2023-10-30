@@ -14,4 +14,7 @@ public interface FixtureDBDao {
 
     @Query("SELECT * FROM fixtures WHERE teamId = :teamId")
     List<FixtureDB> getFixturesByTeamId(int teamId);
+
+    @Query("SELECT COUNT(*) FROM fixtures WHERE teamId = :teamId")
+    int hasFixturesForTeam(int teamId);
 }

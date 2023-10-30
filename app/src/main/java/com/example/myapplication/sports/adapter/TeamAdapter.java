@@ -1,7 +1,9 @@
 package com.example.myapplication.sports.adapter;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +21,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.R;
 import com.example.myapplication.sports.TeamViewModel;
+import com.example.myapplication.sports.database.FixtureDB;
+import com.example.myapplication.sports.database.FixtureDBDao;
+import com.example.myapplication.sports.database.FixtureDatabase;
 import com.example.myapplication.sports.model.Fixture;
 import com.example.myapplication.sports.model.Team;
 
@@ -96,6 +101,8 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
         }
         public void setItem(Team data,TeamViewModel viewModel) throws IOException {
             tvTitle.setText(data.getName());
+            if(data.getSub()) switchButton.setChecked(true);
+            //Log.d("sub!",data.getSub()+"");
 
             switchButton.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
                 @Override
@@ -106,16 +113,31 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
                             @Override
                             public void onChanged(List<Fixture> fixtures) {
                                 if(fixtures!=null) {
+                                    SimpleDateFormat originFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX",new Locale("ko", "KR"));
+                                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                                    SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
                                     for(Fixture f : fixtures) {
                                         try {
                                             // 일자 문자열을 파싱
-                                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX",new Locale("ko", "KR"));
-                                            Date date = dateFormat.parse(f.getEventDate());
-
+                                            Date date = originFormat.parse(f.getEventDate());
                                             // 현재 날짜와 비교
                                             if (date.after(currentDate)) {
                                                 String fixtureInfo = f.getFixtureInfoAsString();
-                                                Log.d("fix",fixtureInfo);
+                                                //Log.d("fix",data.getTeamId()+"");
+                                                FixtureDatabase database = FixtureDatabase.getInstance(itemView.getContext());
+                                                FixtureDBDao fixtureDao = database.fixtureDao();
+
+                                                String datePart = dateFormat.format(date); // "2023-10-24"
+                                                String timePart = timeFormat.format(date); // "04:00"
+
+                                                FixtureDB fixture = new FixtureDB();
+                                                fixture.date = datePart;
+                                                fixture.time = timePart;
+                                                fixture.teamId = data.getTeamId();
+                                                fixture.awayTeamName = f.getAwayTeam().getTeamName();
+                                                fixture.homeTeamName = f.getHomeTeam().getTeamName();
+
+                                                new InsertFixtureTask().execute(fixture);
                                             }
                                         } catch (ParseException e) {
                                             // 날짜 파싱 오류 처리
@@ -125,9 +147,18 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
                                 }
 
                             }
+
                         });
                     } else {
 
+                    }
+                }
+                class InsertFixtureTask extends AsyncTask<FixtureDB, Void, Void> {
+                    @Override
+                    protected Void doInBackground(FixtureDB... fixtures) {
+                        FixtureDBDao fixtureDao = FixtureDatabase.getInstance(itemView.getContext()).fixtureDao();
+                        fixtureDao.insertFixture(fixtures[0]);
+                        return null;
                     }
                 }
             });
@@ -171,4 +202,5 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
         }
     }
 }
+
 
