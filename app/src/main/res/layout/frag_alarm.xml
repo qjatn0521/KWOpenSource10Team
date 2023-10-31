@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+
     <!-- 알람 추가 버튼 -->
     <Button
         android:id="@+id/addAlarmButton"
@@ -35,12 +36,29 @@
 
     </ScrollView>
 
-    <!-- 알람 삭제 버튼 -->
-    <Button
-        android:id="@+id/deleteAlarmButton"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="알람 삭제"
-        android:layout_margin="16dp"/>
+        android:orientation="horizontal">
+
+        <!-- 왼쪽에 위치한 알람 삭제 버튼 -->
+        <Button
+            android:id="@+id/deleteAlarmButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="알람 삭제"
+            android:layout_margin="16dp"/>
+
+        <!-- 오른쪽에 위치한 알람 종료 버튼 -->
+        <Button
+            android:id="@+id/turnoffAlarmButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="알람 종료"
+            android:layout_margin="16dp"/>
+
+    </LinearLayout>
 
 </LinearLayout>
