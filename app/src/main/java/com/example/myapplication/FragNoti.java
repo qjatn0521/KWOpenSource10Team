@@ -53,7 +53,7 @@ public class FragNoti extends Fragment {
         protected void onPostExecute(FixtureDB fixture) {
             // 데이터베이스 쿼리 결과를 처리하고 UI 업데이트
             if(fixture!=null)
-            Log.d("FixtureInfo", "Team: " + fixture.teamId+","+fixture.homeTeamName+" vs "+fixture.awayTeamName+":"+fixture.dateString+", "+fixture.timeString);
+            Log.d("FixtureInfo", "Team: " + fixture.teamId+","+fixture.homeTeamName+" vs "+fixture.awayTeamName+":"+fixture.dateString+", "+fixture.date);
 
         }
     }

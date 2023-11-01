@@ -1,6 +1,9 @@
 package com.example.myapplication.sports.adapter;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -20,6 +23,7 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
 import com.example.myapplication.sports.TeamViewModel;
 import com.example.myapplication.sports.database.FixtureDB;
@@ -27,6 +31,7 @@ import com.example.myapplication.sports.database.FixtureDBDao;
 import com.example.myapplication.sports.database.FixtureDatabase;
 import com.example.myapplication.sports.model.Fixture;
 import com.example.myapplication.sports.model.Team;
+import com.example.myapplication.sports.noti.AlarmRecevier;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,6 +49,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder> {
 
@@ -91,6 +97,9 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
         private Switch switchButton;
         Calendar calendar = Calendar.getInstance();
         Date currentDate = calendar.getTime();
+        SimpleDateFormat originFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX",new Locale("ko", "KR"));
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
 
 
         public MyViewHolder(@NonNull View itemView) {
@@ -114,13 +123,14 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
                             @Override
                             public void onChanged(List<Fixture> fixtures) {
                                 if(fixtures!=null) {
-                                    SimpleDateFormat originFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX",new Locale("ko", "KR"));
-                                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                                    SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+
+                                    TimeZone seoulTimeZone = TimeZone.getTimeZone("Asia/Seoul");
+                                    ArrayList<FixtureDB> tmp = new ArrayList<>();
                                     for(Fixture f : fixtures) {
                                         try {
                                             // 일자 문자열을 파싱
                                             Date date = originFormat.parse(f.getEventDate());
+                                            date.setTime(date.getTime() + seoulTimeZone.getRawOffset() + seoulTimeZone.getDSTSavings());
                                             // 현재 날짜와 비교
                                             if (date.after(currentDate)) {
                                                 String fixtureInfo = f.getFixtureInfoAsString();
@@ -138,14 +148,16 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
                                                 fixture.teamId = data.getTeamId();
                                                 fixture.awayTeamName = f.getAwayTeam().getTeamName();
                                                 fixture.homeTeamName = f.getHomeTeam().getTeamName();
+                                                tmp.add(fixture);
+                                                //fixtureDao.insertFixture(fixture);
 
-                                                new InsertFixtureTask().execute(fixture);
                                             }
                                         } catch (ParseException e) {
                                             // 날짜 파싱 오류 처리
                                             e.printStackTrace();
                                         }
                                     }
+                                    new InsertFixtureTask().execute(tmp);
                                 }
 
                             }
@@ -155,12 +167,21 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
                         new DeleteFixtureTask().execute(data.getTeamId());
                     }
                 }
-                class InsertFixtureTask extends AsyncTask<FixtureDB, Void, Void> {
+                class InsertFixtureTask extends AsyncTask<List<FixtureDB>, Void, Void> {
                     @Override
-                    protected Void doInBackground(FixtureDB... fixtures) {
-                        FixtureDBDao fixtureDao = FixtureDatabase.getInstance(itemView.getContext()).fixtureDao();
-                        fixtureDao.insertFixture(fixtures[0]);
+                    protected Void doInBackground(List<FixtureDB>... fixtureList) {
+                        if (fixtureList != null) {
+                            List<FixtureDB> fixtures = fixtureList[0];
+                            FixtureDBDao fixtureDao = FixtureDatabase.getInstance(itemView.getContext()).fixtureDao();
+                            // 데이터베이스에 대량 삽입
+                            fixtureDao.insertFixtures(fixtures);
+                        }
+                        FixtureDB earliestFixture = getFixtureFromDatabase(itemView.getContext(), originFormat.format(currentDate));
+                        // 다음 알람 시간을 계산
+                        long nextAlarmTimeMillis = calculateNextAlarmTime(earliestFixture);
+
                         //Toast.makeText(itemView.getContext(), "데이터가 추가되었습니다.", Toast.LENGTH_SHORT).show();
+                        setNextAlarm(itemView.getContext(), nextAlarmTimeMillis);
                         return null;
                     }
                 }
@@ -211,6 +232,43 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
 
 
 
+        }
+        private long calculateNextAlarmTime(FixtureDB fixture) {
+            // FixtureDB의 date를 사용하여 다음 알람 시간을 계산
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+            Date date = null;
+
+            try {
+                date = dateFormat.parse(fixture.date);
+                Log.d("DateParsing", "Parsed date: " + date.toString());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            if (date != null) {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(date);
+                //Log.d("succe!","suc");
+                return calendar.getTimeInMillis(); // 다음 알람 시간을 밀리초로 반환
+            } else {
+                // 파싱에 실패하면 기본값을 반환 또는 오류 처리
+                //Log.d("errorCal","errr");
+                return 0;
+            }
+        }
+        private void setNextAlarm(Context context, long nextAlarmTimeMillis) {
+            AlarmManager am = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(context, AlarmRecevier.class);
+
+            // PendingIntent를 생성하여 알람 리시버를 호출
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            // 다음 알람을 설정 (다음 알람 시간은 nextAlarmTimeMillis에 의해 결정됨)
+            am.set(AlarmManager.RTC_WAKEUP, nextAlarmTimeMillis, pendingIntent);
+        }
+        private FixtureDB getFixtureFromDatabase(Context context, String currentDate) {
+            FixtureDBDao yourDatabase = FixtureDatabase.getInstance(context).fixtureDao();
+            return yourDatabase.getEarliestFixture(currentDate);
         }
     }
 }
