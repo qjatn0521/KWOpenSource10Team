@@ -2,7 +2,7 @@ package com.example.myapplication.sports;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import androidx.preference.PreferenceManager;
+import android.preference.PreferenceManager;
 
 public class CustomSharedPreferences {
     private static final String COUNTRY_ID = "country_id";
