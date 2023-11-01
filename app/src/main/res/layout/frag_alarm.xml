@@ -30,8 +30,8 @@
                 android:layout_height="wrap_content"
                 android:contentDescription="알람 목록"
                 android:text="알람 목록"
-                android:gravity="center"
-                android:textSize="20sp"/>
+                android:gravity="center_horizontal"
+                android:textSize="30sp"/>
         </LinearLayout>
 
     </ScrollView>
