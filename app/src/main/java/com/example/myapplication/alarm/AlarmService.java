@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.IBinder;
 
+import com.example.myapplication.R;
+
 public class AlarmService extends Service {
 
     private MediaPlayer mediaPlayer;
