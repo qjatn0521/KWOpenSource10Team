@@ -10,5 +10,6 @@ public class FixtureDB {
     public String homeTeamName;
     public String awayTeamName;
     public String date;
-    public String time;
+    public String dateString;
+    public String timeString;
 }

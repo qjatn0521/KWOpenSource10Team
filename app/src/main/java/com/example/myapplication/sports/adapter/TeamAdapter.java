@@ -12,6 +12,7 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
@@ -131,8 +132,9 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
                                                 String timePart = timeFormat.format(date); // "04:00"
 
                                                 FixtureDB fixture = new FixtureDB();
-                                                fixture.date = datePart;
-                                                fixture.time = timePart;
+                                                fixture.date = originFormat.format(date);
+                                                fixture.dateString = datePart;
+                                                fixture.timeString = timePart;
                                                 fixture.teamId = data.getTeamId();
                                                 fixture.awayTeamName = f.getAwayTeam().getTeamName();
                                                 fixture.homeTeamName = f.getHomeTeam().getTeamName();
@@ -150,7 +152,7 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
 
                         });
                     } else {
-
+                        new DeleteFixtureTask().execute(data.getTeamId());
                     }
                 }
                 class InsertFixtureTask extends AsyncTask<FixtureDB, Void, Void> {
@@ -158,6 +160,16 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
                     protected Void doInBackground(FixtureDB... fixtures) {
                         FixtureDBDao fixtureDao = FixtureDatabase.getInstance(itemView.getContext()).fixtureDao();
                         fixtureDao.insertFixture(fixtures[0]);
+                        //Toast.makeText(itemView.getContext(), "데이터가 추가되었습니다.", Toast.LENGTH_SHORT).show();
+                        return null;
+                    }
+                }
+                class DeleteFixtureTask extends AsyncTask<Integer, Void, Void> {
+                    @Override
+                    protected Void doInBackground(Integer... teamIds) {
+                        FixtureDBDao fixtureDao = FixtureDatabase.getInstance(itemView.getContext()).fixtureDao();
+                        fixtureDao.deleteFixturesByTeamId(teamIds[0]);
+                        //Toast.makeText(itemView.getContext(), "데이터가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
                         return null;
                     }
                 }

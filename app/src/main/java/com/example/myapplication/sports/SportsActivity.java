@@ -40,6 +40,7 @@ public class SportsActivity extends AppCompatActivity {
         rvTeam=findViewById(R.id.soccre_recyclerview);
 
         //팀 정보 얻어오기
+
         viewModel.getAllTeamsOfLeague(leagueId);
         TeamAdapter adapter =new TeamAdapter(viewModel);
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this);
@@ -57,6 +58,7 @@ public class SportsActivity extends AppCompatActivity {
 
             }
         });
+
     }
     private void checkFixturesForTeamInBackground(Team team) {
         new AsyncTask<Void, Void, Integer>() {

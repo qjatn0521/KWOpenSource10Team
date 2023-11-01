@@ -38,23 +38,23 @@ public class FragNoti extends Fragment {
         });
 
         new QueryDatabaseTask().execute();
-
         return binding.getRoot();
     }
-    private class QueryDatabaseTask extends AsyncTask<Void, Void, List<FixtureDB>> {
+    private class QueryDatabaseTask extends AsyncTask<Void, Void, FixtureDB> {
         @Override
-        protected List<FixtureDB> doInBackground(Void... voids) {
+        protected FixtureDB doInBackground(Void... voids) {
             // 데이터베이스에서 FixtureDB 정보 가져오기
             FixtureDBDao fixtureDao = FixtureDatabase.getInstance(getContext()).fixtureDao();
-            return fixtureDao.getFixturesByTeamId(33); // 팀 ID를 적절한 값으로 바꿔주세요.
+            //return fixtureDao.getFixturesByTeamId(33); // 팀 ID를 적절한 값으로 바꿔주세요.
+            return fixtureDao.getEarliestFixture("2023-11-01T14:30:00+05:00");
         }
 
         @Override
-        protected void onPostExecute(List<FixtureDB> fixtureList) {
+        protected void onPostExecute(FixtureDB fixture) {
             // 데이터베이스 쿼리 결과를 처리하고 UI 업데이트
-            for (FixtureDB fixture : fixtureList) {
-                Log.d("FixtureInfo", "Team: " + fixture.teamId+","+fixture.homeTeamName+"vs"+fixture.awayTeamName+":"+fixture.date+", "+fixture.time);
-            }
+            if(fixture!=null)
+            Log.d("FixtureInfo", "Team: " + fixture.teamId+","+fixture.homeTeamName+" vs "+fixture.awayTeamName+":"+fixture.dateString+", "+fixture.timeString);
+
         }
     }
 }

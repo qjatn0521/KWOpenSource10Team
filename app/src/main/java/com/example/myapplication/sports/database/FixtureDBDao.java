@@ -17,4 +17,14 @@ public interface FixtureDBDao {
 
     @Query("SELECT COUNT(*) FROM fixtures WHERE teamId = :teamId")
     int hasFixturesForTeam(int teamId);
+
+    @Query("DELETE FROM fixtures WHERE teamId = :teamId")
+    void deleteFixturesByTeamId(int teamId);
+
+    @Query("SELECT * FROM fixtures WHERE date = :currentDate")
+    List<FixtureDB> getFixturesForToday(String currentDate);
+
+    @Query("SELECT * FROM fixtures WHERE date >= :currentDate ORDER BY date LIMIT 1")
+    FixtureDB getEarliestFixture(String currentDate);
+
 }
