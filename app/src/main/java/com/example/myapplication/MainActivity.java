@@ -8,7 +8,7 @@ import androidx.fragment.app.FragmentTransaction;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import com.example.myapplication.alarm.FragAlarm;
+// import com.example.myapplication.alarm.FragAlarm;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         fragmentManager = getSupportFragmentManager();
 
-        loadFragment(new FragAlarm());
+        // loadFragment(new FragAlarm());
 
         // 바텀 네비게이션 아이템 클릭 이벤트 처리
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
                 Fragment fragment = null;
                 // 클릭된 아이템에 따라 프래그먼트를 변경합니다.
                 if (item.getItemId() == R.id.alarm) {
-                    fragment = new FragAlarm();
+                    // fragment = new FragAlarm();
                 } else if (item.getItemId() == R.id.notification) {
                     fragment = new FragNoti();
                 }
