@@ -35,6 +35,7 @@ public class FragAlarm extends Fragment {
     private LinearLayout alarmListLayout;
     private Button addAlarmButton;
     private Button deleteAlarmButton;
+    private Button stopAlarmButton;
     private List<String> alarms;
     private AlarmManager alarmManager;
     private PendingIntent alarmPendingIntent;
@@ -42,22 +43,29 @@ public class FragAlarm extends Fragment {
 
 
     private void showTimePickerDialog() {
-        TimePickerDialog timePickerDialog = new TimePickerDialog(
-                getContext(),
-                android.R.style.Theme_Holo_Light_Dialog_NoActionBar,
-                new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        String time = String.format("%02d:%02d", hourOfDay, minute);
-                        addAlarm(time);
-                    }
-                },
-                // 초기 시간 설정 (현재 시간)
-                12,
-                0,
-                true
-        );
-        timePickerDialog.show();
+       try {
+           Calendar currentTime = Calendar.getInstance();
+           int hour = currentTime.get(Calendar.HOUR_OF_DAY);
+           int minute = currentTime.get(Calendar.MINUTE);
+           TimePickerDialog timePickerDialog = new TimePickerDialog(
+                   getContext(),
+                   android.R.style.Theme_Holo_Light_Dialog_NoActionBar,
+                   new TimePickerDialog.OnTimeSetListener() {
+                       @Override
+                       public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                           String time = String.format("%02d:%02d", hourOfDay, minute);
+                           addAlarm(time);
+                       }
+                   },
+                   // 초기 시간 설정 (현재 시간)
+                   hour,
+                   minute,
+                   false
+           );
+           timePickerDialog.show();
+       } catch(Exception e) {
+           e.printStackTrace();
+       }
     }
 
     private long calculateAlarmTime(String alarmTime) {
@@ -109,6 +117,7 @@ public class FragAlarm extends Fragment {
         alarmListLayout = view.findViewById(R.id.alarmListLayout);
         addAlarmButton = view.findViewById(R.id.addAlarmButton);
         deleteAlarmButton = view.findViewById(R.id.deleteAlarmButton);
+        stopAlarmButton = view.findViewById(R.id.stopAlarmButton);
         alarms = new ArrayList<>();
         alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
         Intent alarmIntent = new Intent(requireContext(), AlarmReceiver.class);
@@ -128,6 +137,13 @@ public class FragAlarm extends Fragment {
                 deleteAlarm();
             }
         });
+
+        stopAlarmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stopAlarm();
+            }
+        });
     }
 
     private void addAlarm(String alarmTime) {
@@ -137,7 +153,7 @@ public class FragAlarm extends Fragment {
 
         if (alarms.size() == 1) {
             long alarmTimeMillis = calculateAlarmTime(alarmTime); // 알람 시간을 계산하는 함수를 가정합니다.
-            alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + alarmTimeMillis, alarmPendingIntent);
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + alarmTimeMillis, alarmPendingIntent);
         }
     }
 
@@ -145,6 +161,14 @@ public class FragAlarm extends Fragment {
         if (alarms.size() > 0) {
             alarms.remove(alarms.size() - 1);
             updateAlarmList();
+        }
+    }
+
+    private void stopAlarm() {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
         }
     }
 

@@ -52,7 +52,7 @@
 
         <!-- 오른쪽에 위치한 알람 종료 버튼 -->
         <Button
-            android:id="@+id/turnoffAlarmButton"
+            android:id="@+id/stopAlarmButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
