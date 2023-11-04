@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
 }
-
 android {
     namespace = "com.example.myapplication"
     compileSdk = 33
@@ -31,6 +30,11 @@ android {
     }
     viewBinding {
         enable = true
+    }
+
+    // test할 때 moc error 해결 option
+    testOptions {
+        unitTests.isReturnDefaultValues = true
     }
 }
 

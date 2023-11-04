@@ -6,9 +6,11 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 
 // import com.example.myapplication.alarm.FragAlarm;
+import com.example.myapplication.weather.weatherAPI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -24,9 +26,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         fragmentManager = getSupportFragmentManager();
+
+        // Test를 위한 weather 생성
+        new Thread(() -> {
+            weatherAPI weather = new weatherAPI();
+            try {
+                weather.exploreAPI();
+            } catch (Exception e) {
+                System.out.println("e = " + e);
+            }
+        }).start();
 
         // loadFragment(new FragAlarm());
 
@@ -52,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
             FragmentTransaction transaction = fragmentManager.beginTransaction();
             transaction.replace(R.id.main_frame, fragment);
             transaction.commit();
+
             return true;
         }
         return false;
