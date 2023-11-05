@@ -10,6 +10,9 @@ import android.util.Log;
 import android.view.MenuItem;
 
 // import com.example.myapplication.alarm.FragAlarm;
+import com.example.myapplication.weather.api.UltraSrtNcstAPI;
+import com.example.myapplication.weather.api.VillageFcstAPI;
+import com.example.myapplication.weather.api.WeatherAPI;
 import com.example.myapplication.weather.weatherAPI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -31,9 +34,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Test를 위한 weather 생성
         new Thread(() -> {
-            weatherAPI weather = new weatherAPI();
+            UltraSrtNcstAPI weather = new UltraSrtNcstAPI("20231105", "2000", "55", "127");
             try {
-                weather.exploreAPI();
+                weather.getAPI();
             } catch (Exception e) {
                 System.out.println("e = " + e);
             }
