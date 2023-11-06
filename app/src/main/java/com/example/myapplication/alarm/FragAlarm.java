@@ -1,11 +1,15 @@
 package com.example.myapplication.alarm;
 
 import android.os.Bundle;
+import android.provider.Settings;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,10 +33,15 @@ import java.util.Calendar;
 import androidx.core.app.NotificationManagerCompat;
 import android.provider.Settings;
 import android.os.Build;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.fragment.app.Fragment;
 
 public class FragAlarm extends Fragment {
 
-    private LinearLayout alarmListLayout;
+    private ListView alarmListView;
     private Button addAlarmButton;
     private Button deleteAlarmButton;
     private Button stopAlarmButton;
@@ -66,6 +75,15 @@ public class FragAlarm extends Fragment {
        } catch(Exception e) {
            e.printStackTrace();
        }
+    }
+    private void playAlarmSound(long delay) {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mediaPlayer = MediaPlayer.create(requireContext(), R.raw.alarm_sound);
+                mediaPlayer.start();
+            }
+        }, delay);
     }
 
     private long calculateAlarmTime(String alarmTime) {
@@ -114,7 +132,7 @@ public class FragAlarm extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        alarmListLayout = view.findViewById(R.id.alarmListLayout);
+        alarmListView = view.findViewById(R.id.alarmListView);
         addAlarmButton = view.findViewById(R.id.addAlarmButton);
         deleteAlarmButton = view.findViewById(R.id.deleteAlarmButton);
         stopAlarmButton = view.findViewById(R.id.stopAlarmButton);
@@ -153,7 +171,19 @@ public class FragAlarm extends Fragment {
 
         if (alarms.size() == 1) {
             long alarmTimeMillis = calculateAlarmTime(alarmTime); // 알람 시간을 계산하는 함수를 가정합니다.
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + alarmTimeMillis, alarmPendingIntent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (alarmManager != null && alarmManager.canScheduleExactAlarms()) {
+                        alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + alarmTimeMillis, alarmPendingIntent);
+                    } else {
+                        // Handle the case when the app cannot schedule exact alarms
+                        // This can be done by setting an inexact alarm or requesting the necessary permissions
+                    }
+                }
+            } else {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + alarmTimeMillis, alarmPendingIntent);
+            }
+            playAlarmSound(alarmTimeMillis);
         }
     }
 
@@ -161,6 +191,7 @@ public class FragAlarm extends Fragment {
         if (alarms.size() > 0) {
             alarms.remove(alarms.size() - 1);
             updateAlarmList();
+            stopAlarm();
         }
     }
 
@@ -173,12 +204,8 @@ public class FragAlarm extends Fragment {
     }
 
     private void updateAlarmList() {
-        alarmListLayout.removeAllViews();
-        for (String alarm : alarms) {
-            TextView textView = new TextView(getContext());
-            textView.setText(alarm);
-            alarmListLayout.addView(textView);
-        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, alarms);
+        alarmListView.setAdapter(adapter);
 
         if (alarms.size() > 0) {
             requestNotificationPermission();
