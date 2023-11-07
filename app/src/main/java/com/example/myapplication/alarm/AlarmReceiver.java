@@ -14,8 +14,11 @@ public class AlarmReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         Toast.makeText(context, "알람이 울렸습니다!", Toast.LENGTH_LONG).show();
 
-        // 서비스 시작
-        Intent serviceIntent = new Intent(context, AlarmService.class);
-        context.startService(serviceIntent);
+        if (intent != null && intent.hasExtra("playAlarm")) {
+            // 서비스 시작
+            Intent serviceIntent = new Intent(context, AlarmService.class);
+            serviceIntent.putExtras(intent.getExtras()); // 추가 정보를 전달하기 위해 인텐트의 추가 정보를 서비스 인텐트에 넣어줍니다.
+            context.startService(serviceIntent);
+        }
     }
 }
