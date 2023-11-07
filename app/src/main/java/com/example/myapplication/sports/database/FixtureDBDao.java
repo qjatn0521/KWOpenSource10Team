@@ -24,7 +24,7 @@ public interface FixtureDBDao {
     @Query("DELETE FROM fixtures WHERE teamId = :teamId")
     void deleteFixturesByTeamId(int teamId);
 
-    @Query("SELECT * FROM fixtures WHERE date = :currentDate")
+    @Query("SELECT * FROM fixtures WHERE dateString = :currentDate")
     List<FixtureDB> getFixturesForToday(String currentDate);
 
     @Query("SELECT * FROM fixtures WHERE date >= :currentDate ORDER BY date LIMIT 1")

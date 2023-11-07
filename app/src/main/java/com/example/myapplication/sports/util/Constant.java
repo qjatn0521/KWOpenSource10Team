@@ -8,7 +8,7 @@ public class Constant {
     public static final String GET_ALL_TEAMS_OF_LEAGUE = "teams/league/{league_id}";
     public static final String GET_ALL_PLAYERS_OF_TEAM = "players/squad/{team_id}/2019";
     public static final String GET_ALL_TRANSFERS_OF_TEAM = "transfers/team/{team_id}";
-    public static final String GET_TEAM_FIXTURE_OF_LEAGUE = "fixtures/team/{team_id}?timezone=Asia%2FSeoul";
+    public static final String GET_TEAM_FIXTURE_OF_LEAGUE = "fixtures/team/{team_id}";
     public static final String GET_ALL_H2H_ITEMS = "fixtures/h2h/{home_team_id}/{away_team_id}";
     public static final String GET_FIXTURE_STATISTICS = "statistics/fixture/{fixture_id}";
 
