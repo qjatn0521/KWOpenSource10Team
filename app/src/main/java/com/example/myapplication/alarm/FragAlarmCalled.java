@@ -24,14 +24,14 @@ public class FragAlarmCalled extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        goOffButton = view.findViewById(R.id.GoOffbutton);
+        goOffButton = view.findViewById(R.id.GoOffButton);
         goOffButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // 버튼을 클릭하면 frag_alarm 화면이 나오도록 처리
                 Fragment fragAlarm = new FragAlarm();
                 getParentFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, fragAlarm)
+                        .replace(R.id.fragment_alarm_called, fragAlarm)
                         .addToBackStack(null)
                         .commit();
             }

@@ -1,5 +1,6 @@
 package com.example.myapplication.alarm;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.os.Handler;
@@ -17,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import com.example.myapplication.R;
 import android.app.TimePickerDialog;
@@ -31,6 +33,8 @@ import android.media.MediaPlayer;
 import android.os.SystemClock;
 import androidx.core.app.NotificationCompat;
 import java.util.Calendar;
+import java.util.Set;
+
 import androidx.core.app.NotificationManagerCompat;
 import android.provider.Settings;
 import android.os.Build;
@@ -84,8 +88,23 @@ public class FragAlarm extends Fragment {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                mediaPlayer = MediaPlayer.create(requireContext(), R.raw.alarm_sound);
-                mediaPlayer.start();
+                if (alarms.size() > 0) {
+                    mediaPlayer = MediaPlayer.create(requireContext(), R.raw.alarm_sound);
+                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            mediaPlayer.release(); // MediaPlayer 해제
+                            checkAlarms(); // 다음 알람 확인
+                        }
+                    });
+                    mediaPlayer.start();
+                    if (getParentFragmentManager().findFragmentByTag("FragAlarmCalled") == null) {
+                        getParentFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_alarm_called, new FragAlarmCalled(), "FragAlarmCalled")
+                                .addToBackStack(null)
+                                .commit();
+                    }
+                }
             }
         }, delay);
     }
@@ -130,9 +149,7 @@ public class FragAlarm extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-
-        // 앱이 꺼질 때 알람 목록을 저장합니다.
-        outState.putStringArrayList(ALARMS_KEY, new ArrayList<>(alarms));
+        saveAlarmsToSharedPreferences();
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -156,12 +173,12 @@ public class FragAlarm extends Fragment {
         Intent alarmIntent = new Intent(requireContext(), AlarmReceiver.class);
         alarmPendingIntent = PendingIntent.getBroadcast(requireContext(), 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         // 나머지 초기화 작업 수행
-        if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(ALARMS_KEY)) {
-                alarms = savedInstanceState.getStringArrayList(ALARMS_KEY);
-                updateAlarmList();
-            }
+        checkedStates.clear();
+        for (int i = 0; i < alarms.size(); i++) {
+            checkedStates.add(false);
         }
+
+        loadAlarmsFromSharedPreferences();
 
        setOnClickListeners();
        checkAlarms();
@@ -172,44 +189,16 @@ public class FragAlarm extends Fragment {
         alarms.add(alarmTime);
         Collections.sort(alarms); // 시간순으로 정렬
         updateAlarmList();
-
-        // 알람이 울릴 시간을 계산
-        long alarmTimeMillis = calculateAlarmTime(alarmTime);
-        if (alarmTimeMillis > 0 && alarms.size() == 1) {
-            // 첫 번째 알람이 추가될 때만 실행
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    if (alarmManager != null && alarmManager.canScheduleExactAlarms()) {
-                        alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + alarmTimeMillis, alarmPendingIntent);
-                    } else {
-                        // Handle the case when the app cannot schedule exact alarms
-                        // This can be done by setting an inexact alarm or requesting the necessary permissions
-                    }
-                }
-            } else {
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + alarmTimeMillis, alarmPendingIntent);
-            }
-        }
-        // 새로운 알람이 추가될 때마다 checkAlarms 함수를 호출하여 주기적으로 알람을 확인
-        checkAlarms();
+        checkAlarms(); // 다음 알람 확인
     }
     private void checkAlarms() {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (alarms.size() > 0) {
-                    long currentTimeMillis = System.currentTimeMillis();
-                    String currentAlarm = alarms.get(0);
-                    long alarmTimeMillis = calculateAlarmTime(currentAlarm);
-
-                    if (alarmTimeMillis <= 0) {
-                        // 알람이 울릴 시간이 지났을 경우
-                        playAlarmSound(0); // 알람 울리도록 수정
-                    }
-                }
-                checkAlarms(); // 재귀적으로 함수 호출하여 주기적으로 알람 확인
+        if (alarms.size() > 0) {
+            String nextAlarmTime = alarms.get(0);
+            long alarmTimeMillis = calculateAlarmTime(nextAlarmTime);
+            if (alarmTimeMillis > 0) {
+                playAlarmSound(alarmTimeMillis);
             }
-        }, 10000);
+        }
     }
 
     private void deleteAlarm(String alarmTime) {
@@ -217,24 +206,7 @@ public class FragAlarm extends Fragment {
             alarms.remove(alarmTime);
             updateAlarmList();
             stopAlarm();
-            if (alarms.size() > 0) { // 알람이 존재하는 경우에만 다음 알람을 설정하도록 합니다.
-                String nextAlarmTime = alarms.get(0); // 가장 먼저 울릴 알람 시간을 가져옵니다.
-                long alarmTimeMillis = calculateAlarmTime(nextAlarmTime);
-                if (alarmTimeMillis > 0) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            if (alarmManager != null && alarmManager.canScheduleExactAlarms()) {
-                                alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + alarmTimeMillis, alarmPendingIntent);
-                            } else {
-                                // Handle the case when the app cannot schedule exact alarms
-                                // This can be done by setting an inexact alarm or requesting the necessary permissions
-                            }
-                        }
-                    } else {
-                        alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + alarmTimeMillis, alarmPendingIntent);
-                    }
-                }
-            }
+            checkAlarms(); // 다음 알람 확인
         }
     }
 
@@ -251,30 +223,8 @@ public class FragAlarm extends Fragment {
     private void updateAlarmList() {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, alarms);
         alarmListView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
 
-        if (alarms.size() > 0) {
-            requestNotificationPermission();
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(requireContext(), "default")
-                    .setSmallIcon(R.drawable.icon_noti)
-                    .setContentTitle("알람 시간이 되었습니다.")
-                    .setContentText("알람이 울립니다.")
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
-            Intent intent = new Intent(requireContext(), FragAlarm.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            builder.setContentIntent(pendingIntent);
-
-            NotificationManager notificationManager = (NotificationManager) requireContext().getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.notify(0, builder.build());
-
-            mediaPlayer = MediaPlayer.create(requireContext(), R.raw.alarm_sound);
-            mediaPlayer.start();
-            checkedStates.clear();
-            for (int i = 0; i < alarms.size(); i++) {
-                checkedStates.add(false);
-            }
-            adapter.notifyDataSetChanged();
-        }
     }
     private void setOnClickListeners() {
         adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, alarms);
@@ -307,12 +257,19 @@ public class FragAlarm extends Fragment {
         alarmListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (position < 0 || position >= checkedStates.size()) {
+                    return; // 범위를 벗어날 경우 무시
+                }
+
                 for (int i = 0; i < alarms.size(); i++) {
                     if (i != position) {
                         alarmListView.setItemChecked(i, false);
-                        checkedStates.set(i, false);
+                        if (i < checkedStates.size()) {
+                            checkedStates.set(i, false);
+                        }
                     }
                 }
+
                 // 선택된 항목 체크 상태 반전
                 if (!checkedStates.get(position)) {
                     alarmListView.setItemChecked(position, true);
@@ -323,5 +280,20 @@ public class FragAlarm extends Fragment {
                 }
             }
         });
+    }
+    private void saveAlarmsToSharedPreferences() {
+        SharedPreferences sharedPreferences = requireContext().getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Set<String> alarmsSet = new HashSet<>(alarms);
+        editor.putStringSet(ALARMS_KEY, alarmsSet);
+        editor.apply();
+    }
+
+    private void loadAlarmsFromSharedPreferences() {
+        SharedPreferences sharedPreferences = requireContext().getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
+        Set<String> alarmsSet = sharedPreferences.getStringSet(ALARMS_KEY, new HashSet<>());
+        alarms.clear(); // 기존 알람 리스트를 초기화
+        alarms.addAll(alarmsSet); // 새로운 알람 리스트를 추가
+        updateAlarmList();
     }
 }
