@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
 }
+
 android {
     namespace = "com.example.myapplication"
     compileSdk = 33
@@ -65,4 +66,7 @@ dependencies {
     //Room DB 라이브러리
     implementation ("androidx.room:room-runtime:2.2.6")
     annotationProcessor ("androidx.room:room-compiler:2.2.6")
+
+
+    implementation ("androidx.core:core-ktx:1.7.0")
 }
