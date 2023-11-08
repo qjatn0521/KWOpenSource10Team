@@ -5,10 +5,10 @@ import java.util.List;
 
 /** 초단기 예보 데이터 */
 public class UltraSrtNcstData {
-    private List<String> baseDate;
-    private List<String> baseTime;
-    private List<String> category;
-    private List<String> obsrValue;
+    private List<String> baseDate = new ArrayList<>();
+    private List<String> baseTime = new ArrayList<>();
+    private List<String> category = new ArrayList<>();
+    private List<String> obsrValue = new ArrayList<>();
 
     // 기본 생성자로 arrayList 객체 생성
     public UltraSrtNcstData(){

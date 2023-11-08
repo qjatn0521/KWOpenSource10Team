@@ -2,6 +2,8 @@ package com.example.myapplication.weather.api;
 
 import android.util.Log;
 
+import com.example.myapplication.weather.domain.VillageFcstData;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,6 +19,7 @@ public class UltraSrtNcstAPI implements WeatherAPI {
     private StringBuilder urlBuilder;
     private final String endKey = "WGbZ3y8YenvWEK4%2FwabF0QlpEw7Noxa3vg5aso798whVG8O7rV3ZqyP%2BmL44LY4ouI4LjZOJf8GbBgGR5kRp4g%3D%3D"; /* 인코딩 키 */
 
+    private String baseDate, baseTime, category, obsrValue;
 
     public UltraSrtNcstAPI(String baseDate, String baseTime, String nx, String ny) {
         this.urlBuilder = new StringBuilder("http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst"); /* 단기예보 URL*/
@@ -41,7 +44,15 @@ public class UltraSrtNcstAPI implements WeatherAPI {
 
     @Override
     public void saveItem(){
+        UltraSrtNcstAPI data = new UltraSrtNcstAPI(baseDate, baseTime, category, obsrValue);
+    }
 
+    @Override
+    public void parseItem(JSONObject jsonObj_4) throws JSONException{
+        this.baseDate = jsonObj_4.getString("baseDate");
+        this.baseTime = jsonObj_4.getString("baseTime");
+        this.category = jsonObj_4.getString("category");
+        this.obsrValue = jsonObj_4.getString("obsrValue");
     }
 
     @Override
@@ -95,14 +106,12 @@ public class UltraSrtNcstAPI implements WeatherAPI {
             // items로 부터 itemlist 를 받기
             JSONObject jsonObj_4 = new JSONObject(items);
             JSONArray jsonArray = jsonObj_4.getJSONArray("item");
-            String weather;
-            String tmperature;
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 jsonObj_4 = jsonArray.getJSONObject(i);
-                Log.d("items", jsonObj_4.toString());
-                String category = jsonObj_4.getString("category");
-                Log.d("category", category);
+                Log.d("TagTagTagasd", jsonObj_4.toString());
+                parseItem(jsonObj_4);
+                saveItem();
             }
         } catch (JSONException e){
             System.out.println("e = " + e);

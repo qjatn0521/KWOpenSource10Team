@@ -1,5 +1,8 @@
 package com.example.myapplication.weather.api;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 
 public interface WeatherAPI {
@@ -13,4 +16,6 @@ public interface WeatherAPI {
     public void getAPI() throws IOException;
 
     public void saveItem();
+
+    public void parseItem(JSONObject jsonObject) throws JSONException;
 }

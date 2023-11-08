@@ -19,12 +19,10 @@ public class VillageFcstAPI implements WeatherAPI {
     private StringBuilder urlBuilder;
     private String baseDate, baseTime, category, fcstDate, fcstTime, fcstValue;
     private final String endKey = "WGbZ3y8YenvWEK4%2FwabF0QlpEw7Noxa3vg5aso798whVG8O7rV3ZqyP%2BmL44LY4ouI4LjZOJf8GbBgGR5kRp4g%3D%3D"; /* 인코딩 키 */
-    private VillageFcstData villageFcstData;
 
     // API에 맞는 파라미터를 적용하여 URL을 생성하는 함수
     public VillageFcstAPI(String baseDate, String baseTime, String nx, String ny) {
         this.urlBuilder = new StringBuilder("http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst"); /* 단기예보 URL*/
-        villageFcstData = new VillageFcstData();
 
         try {
             urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + "=" + endKey);
@@ -44,12 +42,11 @@ public class VillageFcstAPI implements WeatherAPI {
         return urlBuilder;
     }
 
+    @Override
     public void parseItem(JSONObject jsonObj_4) throws JSONException {
         this.baseDate = jsonObj_4.getString("baseDate");
-        System.out.println("baseDate = " + this.baseDate);
         this.baseTime = jsonObj_4.getString("baseTime");
         this.category = jsonObj_4.getString("category");
-        System.out.println("category = " + this.category);
         this.fcstDate = jsonObj_4.getString("fcstDate");
         this.fcstTime = jsonObj_4.getString("fcstTime");
         this.fcstValue = jsonObj_4.getString("fcstValue");
@@ -59,11 +56,6 @@ public class VillageFcstAPI implements WeatherAPI {
     public void saveItem(){
         VillageFcstData data = new VillageFcstData(baseDate, baseTime, category,
                 fcstDate, fcstTime, fcstValue);
-    }
-
-    public VillageFcstData getVillageFcstData() {
-        System.out.println(villageFcstData.getCategory());
-        return villageFcstData;
     }
 
     @Override
@@ -122,7 +114,7 @@ public class VillageFcstAPI implements WeatherAPI {
                 jsonObj_4 = jsonArray.getJSONObject(i);
                 Log.d("TagTagTagasd", jsonObj_4.toString());
                 parseItem(jsonObj_4);
-                // saveItem();
+                saveItem();
             }
         } catch (JSONException e){
             System.out.println("e = " + e);
