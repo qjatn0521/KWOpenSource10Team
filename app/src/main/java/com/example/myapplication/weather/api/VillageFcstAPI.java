@@ -2,7 +2,6 @@ package com.example.myapplication.weather.api;
 
 import android.util.Log;
 
-import com.example.myapplication.weather.domain.VillageFcstData;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,11 +13,19 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
-public class VillageFcstAPI implements WeatherAPI {
+public class VillageFcstAPI {
     private StringBuilder urlBuilder;
-    private String baseDate, baseTime, category, fcstDate, fcstTime, fcstValue;
+    private String bd, bt, cg, fd, ft, fv;
     private final String endKey = "WGbZ3y8YenvWEK4%2FwabF0QlpEw7Noxa3vg5aso798whVG8O7rV3ZqyP%2BmL44LY4ouI4LjZOJf8GbBgGR5kRp4g%3D%3D"; /* 인코딩 키 */
+    private List<String> baseDate = new ArrayList<>();
+    private List<String> baseTime = new ArrayList<>();
+    private List<String> category = new ArrayList<>();
+    private List<String> fcstDate = new ArrayList<>();
+    private List<String> fcstTime= new ArrayList<>();
+    private List<String> fcstValue = new ArrayList<>();
 
     // API에 맞는 파라미터를 적용하여 URL을 생성하는 함수
     public VillageFcstAPI(String baseDate, String baseTime, String nx, String ny) {
@@ -42,23 +49,27 @@ public class VillageFcstAPI implements WeatherAPI {
         return urlBuilder;
     }
 
-    @Override
+
     public void parseItem(JSONObject jsonObj_4) throws JSONException {
-        this.baseDate = jsonObj_4.getString("baseDate");
-        this.baseTime = jsonObj_4.getString("baseTime");
-        this.category = jsonObj_4.getString("category");
-        this.fcstDate = jsonObj_4.getString("fcstDate");
-        this.fcstTime = jsonObj_4.getString("fcstTime");
-        this.fcstValue = jsonObj_4.getString("fcstValue");
+        bd = jsonObj_4.getString("baseDate");
+        bt = jsonObj_4.getString("baseTime");
+        cg = jsonObj_4.getString("category");
+        fd = jsonObj_4.getString("fcstDate");
+        ft = jsonObj_4.getString("fcstTime");
+        fv = jsonObj_4.getString("fcstValue");
     }
 
-    @Override
+
     public void saveItem(){
-        VillageFcstData data = new VillageFcstData(baseDate, baseTime, category,
-                fcstDate, fcstTime, fcstValue);
+        baseDate.add(bd);
+        baseTime.add(bt);
+        category.add(cg);
+        fcstDate.add(fd);
+        fcstTime.add(ft);
+        fcstValue.add(fv);
     }
 
-    @Override
+
     public void getAPI() throws IOException {
         URL url = new URL(urlBuilder.toString());
 
@@ -86,8 +97,6 @@ public class VillageFcstAPI implements WeatherAPI {
 
         String result = sb.toString();
 
-        // API 테스트
-        // LocalDateTime t = LocalDateTime.now().minusMinutes(30);
         //=======이 밑에 부터는 json에서 데이터 파싱해 오는 부분이다=====//
         try {
             System.out.println(result);
@@ -112,12 +121,35 @@ public class VillageFcstAPI implements WeatherAPI {
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 jsonObj_4 = jsonArray.getJSONObject(i);
-                Log.d("TagTagTagasd", jsonObj_4.toString());
                 parseItem(jsonObj_4);
                 saveItem();
             }
         } catch (JSONException e){
             System.out.println("e = " + e);
         }
+    }
+
+    public List<String> getBaseDate() {
+        return baseDate;
+    }
+
+    public List<String> getBaseTime() {
+        return baseTime;
+    }
+
+    public List<String> getCategory() {
+        return category;
+    }
+
+    public List<String> getFcstDate() {
+        return fcstDate;
+    }
+
+    public List<String> getFcstTime() {
+        return fcstTime;
+    }
+
+    public List<String> getFcstValue() {
+        return fcstValue;
     }
 }

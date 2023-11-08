@@ -2,8 +2,6 @@ package com.example.myapplication.weather.api;
 
 import android.util.Log;
 
-import com.example.myapplication.weather.domain.VillageFcstData;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,12 +12,18 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
-public class UltraSrtNcstAPI implements WeatherAPI {
+public class UltraSrtNcstAPI{
     private StringBuilder urlBuilder;
     private final String endKey = "WGbZ3y8YenvWEK4%2FwabF0QlpEw7Noxa3vg5aso798whVG8O7rV3ZqyP%2BmL44LY4ouI4LjZOJf8GbBgGR5kRp4g%3D%3D"; /* 인코딩 키 */
 
-    private String baseDate, baseTime, category, obsrValue;
+    private List<String> baseDate = new ArrayList<>();
+    private List<String> baseTime = new ArrayList<>();
+    private List<String> category = new ArrayList<>();
+    private List<String> obsrValue = new ArrayList<>();
+    private String bd, bt, cg, ob;
 
     public UltraSrtNcstAPI(String baseDate, String baseTime, String nx, String ny) {
         this.urlBuilder = new StringBuilder("http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst"); /* 단기예보 URL*/
@@ -42,20 +46,22 @@ public class UltraSrtNcstAPI implements WeatherAPI {
         return urlBuilder;
     }
 
-    @Override
-    public void saveItem(){
-        UltraSrtNcstAPI data = new UltraSrtNcstAPI(baseDate, baseTime, category, obsrValue);
+
+    public void saveItem() {
+        baseDate.add(bd);
+        baseTime.add(bt);
+        category.add(cg);
+        obsrValue.add(ob);
     }
 
-    @Override
+
     public void parseItem(JSONObject jsonObj_4) throws JSONException{
-        this.baseDate = jsonObj_4.getString("baseDate");
-        this.baseTime = jsonObj_4.getString("baseTime");
-        this.category = jsonObj_4.getString("category");
-        this.obsrValue = jsonObj_4.getString("obsrValue");
+        bd = jsonObj_4.getString("baseDate");
+        bt = jsonObj_4.getString("baseTime");
+        cg = jsonObj_4.getString("category");
+        ob = jsonObj_4.getString("obsrValue");
     }
 
-    @Override
     public void getAPI() throws IOException {
         URL url = new URL(urlBuilder.toString());
 
@@ -109,12 +115,27 @@ public class UltraSrtNcstAPI implements WeatherAPI {
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 jsonObj_4 = jsonArray.getJSONObject(i);
-                Log.d("TagTagTagasd", jsonObj_4.toString());
                 parseItem(jsonObj_4);
                 saveItem();
             }
         } catch (JSONException e){
             System.out.println("e = " + e);
         }
+    }
+
+    public List<String> getBaseDate() {
+        return baseDate;
+    }
+
+    public List<String> getBaseTime() {
+        return baseTime;
+    }
+
+    public List<String> getCategory() {
+        return category;
+    }
+
+    public List<String> getObsrValue() {
+        return obsrValue;
     }
 }

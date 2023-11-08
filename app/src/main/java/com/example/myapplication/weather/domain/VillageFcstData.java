@@ -1,11 +1,12 @@
+/** 날씨도 데이터베이스 사용이 필요하면 이 코드를 사용하자 */
+
+/*
 package com.example.myapplication.weather.domain;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/** 단기 예보 데이터 */
 public class VillageFcstData {
-    /** 배열로 모아서 한꺼번에 저장하자 */
 
     private List<String> baseDate = new ArrayList<>();
     private List<String> baseTime = new ArrayList<>();
@@ -60,3 +61,5 @@ public class VillageFcstData {
         return fcstValue;
     }
 }
+
+ */

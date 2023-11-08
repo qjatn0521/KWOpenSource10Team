@@ -6,15 +6,14 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 
 // import com.example.myapplication.alarm.FragAlarm;
 import com.example.myapplication.weather.api.UltraSrtNcstAPI;
 import com.example.myapplication.weather.api.VillageFcstAPI;
-import com.example.myapplication.weather.api.WeatherAPI;
-import com.example.myapplication.weather.domain.VillageFcstData;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,16 +31,6 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         fragmentManager = getSupportFragmentManager();
 
-        // Test를 위한 weather 생성
-        new Thread(() -> {
-            WeatherAPI weather = new UltraSrtNcstAPI("20231108", "1000", "55", "127");
-            try {
-                weather.getAPI();
-
-            } catch (Exception e) {
-                System.out.println("e = " + e);
-            }
-        }).start();
 
         // loadFragment(new FragAlarm());
 
