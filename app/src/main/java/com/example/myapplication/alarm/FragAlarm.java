@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -73,6 +74,8 @@ public class FragAlarm extends Fragment {
                         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                             String time = String.format("%02d:%02d", hourOfDay, minute);
                             addAlarm(time);
+                            Log.d("set","set");
+                            alarmManager.set(AlarmManager.RTC_WAKEUP, 1000, alarmPendingIntent);
                         }
                     },
                     // 초기 시간 설정 (현재 시간)
@@ -185,7 +188,9 @@ public class FragAlarm extends Fragment {
         alarmListView.setAdapter(adapter);
         alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
         Intent alarmIntent = new Intent(requireContext(), AlarmReceiver.class);
-        alarmPendingIntent = PendingIntent.getBroadcast(requireContext(), 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        alarmPendingIntent = PendingIntent.getBroadcast(requireContext(), 1, alarmIntent,  PendingIntent.FLAG_IMMUTABLE);
+
+
         // 나머지 초기화 작업 수행
         checkedStates.clear();
         if (savedInstanceState != null) {
@@ -211,7 +216,7 @@ public class FragAlarm extends Fragment {
         alarms.add(alarmTime);
         Collections.sort(alarms); // 시간순으로 정렬
         updateAlarmList();
-        checkAlarms(); // 다음 알람 확인
+        //checkAlarms(); // 다음 알람 확인
     }
 
     private void checkAlarms() {
@@ -219,6 +224,7 @@ public class FragAlarm extends Fragment {
             alarmTime = alarms.get(0);
             long alarmTimeMillis = calculateAlarmTime(alarmTime);
             if (alarmTimeMillis > 0) {
+
                 playAlarmSound(alarmTimeMillis);
             }
         }
