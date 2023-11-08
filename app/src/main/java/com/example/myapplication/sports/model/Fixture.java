@@ -168,4 +168,15 @@ public class Fixture implements Parcelable {
         dest.writeInt(goalsHomeTeam);
         dest.writeInt(goalsAwayTeam);
     }
+    public String getFixtureInfoAsString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("League ID: ").append(leagueİd).append("\n");
+        builder.append("Event Date: ").append(eventDate).append("\n");
+        builder.append("Goals Home Team: ").append(homeTeam.getTeamName()).append("\n");
+        builder.append("Goals Away Team: ").append(awayTeam.getTeamName()).append("\n");
+
+        // You can add more fields as needed.
+
+        return builder.toString();
+    }
 }

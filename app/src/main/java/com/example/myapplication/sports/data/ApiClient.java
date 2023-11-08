@@ -1,7 +1,5 @@
 package com.example.myapplication.sports.data;
 
-import android.util.Log;
-
 import com.example.myapplication.sports.model.FixtureResponse;
 import com.example.myapplication.sports.model.TeamResponse;
 import com.example.myapplication.sports.util.Constant;
@@ -23,9 +21,10 @@ public class ApiClient {
     public Single<TeamResponse> getAllTeamsOfLeague(int leagueId) {
         return api.getAllTeamsOfLeague(leagueId);
     }
-    public Single<FixtureResponse> getAllFixtureOfLeague(int leagueId) {
-        return api.getAllFixtureOfLeague(leagueId);
+    public Single<FixtureResponse> getAllFixtureOfTeam(int teamId) {
+        return api.getAllFixtureOfTeam(teamId);
     }
+
     /*public Single<LeagueTableResponse> getLeagueTable(int leagueId) {
         return api.getLeagueTable(leagueId);
     }
@@ -39,10 +38,10 @@ public class ApiClient {
     public Single<TransferResponse> getAllTransfersOfTeam(int teamId) {
         return api.getAllTransfersOfTeam(teamId);
     }
-
-    public Single<H2HResponse> getAllH2hItems(int homeTeamId, int awayTeamId) {
+public Single<H2HResponse> getAllH2hItems(int homeTeamId, int awayTeamId) {
         return api.getAllH2hItems(homeTeamId, awayTeamId);
     }
+
     public Single<StatisticsResponse> getFixtureStatistics(int fixtureId) {
         return api.getFixtureStatistics(fixtureId);
     }*/
