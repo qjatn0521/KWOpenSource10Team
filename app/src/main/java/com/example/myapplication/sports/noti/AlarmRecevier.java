@@ -39,8 +39,7 @@ public class AlarmRecevier extends BroadcastReceiver {
             );
             builder = new NotificationCompat.Builder(context, CHANNEL_ID);
         } else {
-            builder = new NotificationCompat.Builder(context);
-        }
+            builder = new NotificationCompat.Builder(context);        }
 
         //알림창 클릭 시 activity 화면 부름
         Intent intent2 = new Intent(context, MainActivity.class);
