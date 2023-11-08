@@ -34,7 +34,7 @@ import android.os.SystemClock;
 import androidx.core.app.NotificationCompat;
 import java.util.Calendar;
 import java.util.Set;
-
+import android.app.ActivityManager;
 import androidx.core.app.NotificationManagerCompat;
 import android.provider.Settings;
 import android.os.Build;
@@ -98,9 +98,12 @@ public class FragAlarm extends Fragment {
                         }
                     });
                     mediaPlayer.start();
-                    if (getParentFragmentManager().findFragmentByTag("FragAlarmCalled") == null) {
+
+                    // 앱이 꺼져 있을 때만 FragAlarmCalled 프래그먼트를 띄웁니다.
+                    if (!isAppInForeground()) {
+                        Fragment fragAlarmCalled = new FragAlarmCalled();
                         getParentFragmentManager().beginTransaction()
-                                .replace(R.id.fragment_alarm_called, new FragAlarmCalled(), "FragAlarmCalled")
+                                .replace(R.id.fragment_alarm_called, fragAlarmCalled, "FragAlarmCalled")
                                 .addToBackStack(null)
                                 .commit();
                     }
@@ -108,6 +111,7 @@ public class FragAlarm extends Fragment {
             }
         }, delay);
     }
+
 
     private long calculateAlarmTime(String alarmTime) {
         // 현재 시간 계산
@@ -150,7 +154,9 @@ public class FragAlarm extends Fragment {
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         saveAlarmsToSharedPreferences();
+        outState.putStringArrayList(ALARMS_KEY, new ArrayList<>(alarms));
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.frag_alarm, container, false);
@@ -174,6 +180,14 @@ public class FragAlarm extends Fragment {
         alarmPendingIntent = PendingIntent.getBroadcast(requireContext(), 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         // 나머지 초기화 작업 수행
         checkedStates.clear();
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(ALARMS_KEY)) {
+                List<String> savedAlarms = new ArrayList<>(savedInstanceState.getStringArrayList(ALARMS_KEY));
+                alarms.clear();
+                alarms.addAll(savedAlarms);
+                updateAlarmList();
+            }
+        }
         for (int i = 0; i < alarms.size(); i++) {
             checkedStates.add(false);
         }
@@ -293,7 +307,23 @@ public class FragAlarm extends Fragment {
         SharedPreferences sharedPreferences = requireContext().getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
         Set<String> alarmsSet = sharedPreferences.getStringSet(ALARMS_KEY, new HashSet<>());
         alarms.clear(); // 기존 알람 리스트를 초기화
-        alarms.addAll(alarmsSet); // 새로운 알람 리스트를 추가
+        List<String> sortedAlarms = new ArrayList<>(alarmsSet);
+        Collections.sort(sortedAlarms); // 시간순으로 정렬
+        alarms.addAll(sortedAlarms); // 정렬된 알람 리스트를 추가
         updateAlarmList();
     }
+
+    private boolean isAppInForeground() {
+        ActivityManager activityManager = (ActivityManager) requireContext().getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> processInfo = activityManager.getRunningAppProcesses();
+        if (processInfo != null) {
+            for (ActivityManager.RunningAppProcessInfo info : processInfo) {
+                if (info.processName.equals(requireContext().getPackageName()) && info.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }
