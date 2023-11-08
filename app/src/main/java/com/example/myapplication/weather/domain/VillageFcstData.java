@@ -1,8 +1,9 @@
-package com.example.myapplication.weather.data;
+package com.example.myapplication.weather.domain;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/** 단기 예보 데이터 */
 public class VillageFcstData {
     /** 배열로 모아서 한꺼번에 저장하자 */
 

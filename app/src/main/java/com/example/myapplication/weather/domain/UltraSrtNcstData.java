@@ -1,8 +1,9 @@
-package com.example.myapplication.weather.data;
+package com.example.myapplication.weather.domain;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/** 초단기 예보 데이터 */
 public class UltraSrtNcstData {
     private List<String> baseDate;
     private List<String> baseTime;

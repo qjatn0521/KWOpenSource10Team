@@ -2,7 +2,7 @@ package com.example.myapplication.weather.api;
 
 import android.util.Log;
 
-import com.example.myapplication.weather.data.VillageFcstData;
+import com.example.myapplication.weather.domain.VillageFcstData;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,7 +17,7 @@ import java.net.URLEncoder;
 
 public class VillageFcstAPI implements WeatherAPI {
     private StringBuilder urlBuilder;
-    String baseDate, baseTime, category, fcstDate, fcstTime, fcstValue;
+    private String baseDate, baseTime, category, fcstDate, fcstTime, fcstValue;
     private final String endKey = "WGbZ3y8YenvWEK4%2FwabF0QlpEw7Noxa3vg5aso798whVG8O7rV3ZqyP%2BmL44LY4ouI4LjZOJf8GbBgGR5kRp4g%3D%3D"; /* 인코딩 키 */
     private VillageFcstData villageFcstData;
 
@@ -44,7 +44,7 @@ public class VillageFcstAPI implements WeatherAPI {
         return urlBuilder;
     }
 
-    private void parseItem(JSONObject jsonObj_4) throws JSONException {
+    public void parseItem(JSONObject jsonObj_4) throws JSONException {
         this.baseDate = jsonObj_4.getString("baseDate");
         System.out.println("baseDate = " + this.baseDate);
         this.baseTime = jsonObj_4.getString("baseTime");
@@ -55,7 +55,8 @@ public class VillageFcstAPI implements WeatherAPI {
         this.fcstValue = jsonObj_4.getString("fcstValue");
     }
 
-    private void saveItem(){
+    @Override
+    public void saveItem(){
         VillageFcstData data = new VillageFcstData(baseDate, baseTime, category,
                 fcstDate, fcstTime, fcstValue);
     }

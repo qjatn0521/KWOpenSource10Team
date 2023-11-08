@@ -11,4 +11,6 @@ public interface WeatherAPI {
      * weatherAPI weather = new ultraSrtNcstAPI();
      */
     public void getAPI() throws IOException;
+
+    public void saveItem();
 }

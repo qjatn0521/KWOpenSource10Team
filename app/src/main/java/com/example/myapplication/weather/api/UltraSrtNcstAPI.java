@@ -40,6 +40,11 @@ public class UltraSrtNcstAPI implements WeatherAPI {
     }
 
     @Override
+    public void saveItem(){
+
+    }
+
+    @Override
     public void getAPI() throws IOException {
         URL url = new URL(urlBuilder.toString());
 
