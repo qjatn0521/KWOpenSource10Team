@@ -12,4 +12,8 @@ public class FixtureDB {
     public String date;
     public String dateString;
     public String timeString;
+    public String homeTeamlogo;
+    public String awayTeamlogo;
+    public int fixtureId;
+
 }
