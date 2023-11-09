@@ -14,6 +14,7 @@ import androidx.core.app.NotificationCompat;
 
 import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
+import com.example.myapplication.alarm.FragAlarmCalled;
 
 public class NotificationReceiver extends BroadcastReceiver {
     private String TAG = this.getClass().getSimpleName();
@@ -53,7 +54,6 @@ public class NotificationReceiver extends BroadcastReceiver {
             .setSmallIcon(R.drawable.image_sprots_soccerball)
         //알림창 터치시 자동 삭제
             .setAutoCancel(true);
-
 
         //NotificationManager를 이용하여 푸시 알림 보내기
         manager.notify(100,builder.build());

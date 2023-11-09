@@ -1,41 +1,34 @@
 package com.example.myapplication.alarm;
-
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import com.example.myapplication.R;
+import android.view.WindowManager;
 import android.widget.Button;
-import android.view.View.OnClickListener;
 
-public class FragAlarmCalled extends Fragment {
+import com.example.myapplication.MainActivity;
+import com.example.myapplication.R;
 
-    private Button goOffButton;
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.frag_alarm_called, container, false);
-    }
+public class FragAlarmCalled extends Activity {
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.frag_alarm_called);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
-        goOffButton = view.findViewById(R.id.GoOffButton);
-        goOffButton.setOnClickListener(new View.OnClickListener() {
+        Button btnExit = findViewById(R.id.GoOffButton);
+
+        btnExit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 버튼을 클릭하면 frag_alarm 화면이 나오도록 처리
-                Fragment fragAlarm = new FragAlarm();
-                getParentFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_alarm_called, fragAlarm)
-                        .addToBackStack(null)
-                        .commit();
+                System.exit(0);
             }
         });
+
     }
 }
-

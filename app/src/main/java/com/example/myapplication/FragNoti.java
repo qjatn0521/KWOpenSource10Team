@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.myapplication.alarm.AlarmReceiver;
 import com.example.myapplication.databinding.FragNotiBinding;
 import com.example.myapplication.sports.SportsActivity;
 import com.example.myapplication.sports.adapter.TeamAdapter;

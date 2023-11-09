@@ -102,7 +102,7 @@ public class FragAlarm extends Fragment {
                     //updateAlarmList(); // 알람 리스트 갱신
                 }
             });
-        }
+        }/*
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -111,15 +111,15 @@ public class FragAlarm extends Fragment {
 
                     // 앱이 꺼져 있을 때만 FragAlarmCalled 프래그먼트를 띄웁니다.
                     if (!isAppInForeground()) {
-                        Fragment fragAlarmCalled = new FragAlarmCalled();
+                        //Fragment fragAlarmCalled = new FragAlarmCalled();
                         getParentFragmentManager().beginTransaction()
-                                .replace(R.id.fragment_alarm_called, fragAlarmCalled, "FragAlarmCalled")
+                                //.replace(R.id.fragment_alarm_called, fragAlarmCalled, "FragAlarmCalled")
                                 .addToBackStack(null)
                                 .commit();
                     }
                 }
             }
-        }, delay);
+        }, delay);*/
     }
 
 
@@ -217,6 +217,16 @@ public class FragAlarm extends Fragment {
         Collections.sort(alarms); // 시간순으로 정렬
         updateAlarmList();
         //checkAlarms(); // 다음 알람 확인
+
+        //알람 등록
+
+        long alarmTimeMillis = calculateAlarmTime(alarmTime);
+        Log.d("alarmTime",alarmTimeMillis+"");
+        Intent receiverIntent = new Intent(getContext(), AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), 0, receiverIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        AlarmManager alarmManager =(AlarmManager)getContext().getSystemService(Context.ALARM_SERVICE);;
+        alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTimeMillis, pendingIntent);
     }
 
     private void checkAlarms() {
@@ -224,7 +234,6 @@ public class FragAlarm extends Fragment {
             alarmTime = alarms.get(0);
             long alarmTimeMillis = calculateAlarmTime(alarmTime);
             if (alarmTimeMillis > 0) {
-
                 playAlarmSound(alarmTimeMillis);
             }
         }

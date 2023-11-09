@@ -1,16 +1,27 @@
 package com.example.myapplication;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
 
 // import com.example.myapplication.alarm.FragAlarm;
 import com.example.myapplication.alarm.FragAlarm;
+import com.example.myapplication.alarm.PermissionUtils;
 import com.example.myapplication.weather.api.UltraSrtNcstAPI;
 import com.example.myapplication.weather.api.VillageFcstAPI;
 import com.example.myapplication.weather.api.WeatherAPI;
@@ -33,9 +44,16 @@ public class MainActivity extends AppCompatActivity {
 
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         fragmentManager = getSupportFragmentManager();
-
+        runtimeCheckPermission();
 
         loadFragment(new FragAlarm());
+        if (PermissionUtils.hasSystemAlertWindowPermission(this)) {
+            // 권한이 이미 부여되어 있음
+            // 오버레이를 사용하는 코드를 실행할 수 있음
+        } else {
+            // 권한이 부여되지 않았으므로 요청
+            PermissionUtils.requestSystemAlertWindowPermission(this);
+        }
 
         // 바텀 네비게이션 아이템 클릭 이벤트 처리
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -64,4 +82,10 @@ public class MainActivity extends AppCompatActivity {
         }
         return false;
     }
+    public void runtimeCheckPermission() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.SYSTEM_ALERT_WINDOW) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions( this, new String[]{Manifest.permission.SYSTEM_ALERT_WINDOW}, 1004);
+        }
+    }
+
 }
