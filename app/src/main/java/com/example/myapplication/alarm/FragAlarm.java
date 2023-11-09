@@ -128,8 +128,13 @@ public class FragAlarm extends Fragment {
 
         // 입력된 알람 시간 파싱
         String[] timeComponents = alarmTime.split(":");
-        int alarmHour = Integer.parseInt(timeComponents[0]);
-        int alarmMinute = Integer.parseInt(timeComponents[1]);
+        int alarmHour = Integer.parseInt(timeComponents[0].replaceAll("[^0-9]", ""));
+        int alarmMinute = Integer.parseInt(timeComponents[1].replaceAll("[^0-9]", ""));
+
+        // "오후" 시간에 12를 더합니다.
+        if (alarmTime.contains("오후") && alarmHour < 12) {
+            alarmHour += 12;
+        }
 
         // 알람 시간을 밀리초로 변환
         long currentTimeMillis = System.currentTimeMillis();
@@ -201,7 +206,7 @@ public class FragAlarm extends Fragment {
         }
 
         loadAlarmsFromSharedPreferences();
-
+        updateAlarmList();
         setOnClickListeners();
         checkAlarms();
 
@@ -316,19 +321,54 @@ public class FragAlarm extends Fragment {
     private void saveAlarmsToSharedPreferences() {
         SharedPreferences sharedPreferences = requireContext().getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        Set<String> alarmsSet = new HashSet<>(alarms);
+        Set<String> alarmsSet = new HashSet<>();
+        for (String alarm : alarms) {
+            alarmsSet.add(formatAlarmTimeForSave(alarm));
+        }
         editor.putStringSet(ALARMS_KEY, alarmsSet);
         editor.apply();
+    }
+    private String formatAlarmTimeForSave(String alarmTime) {
+        // 12시간 형식의 시간을 24시간 형식으로 변환합니다.
+        String[] timeComponents = alarmTime.split(":");
+        int hour = Integer.parseInt(timeComponents[0].replaceAll("[^0-9]", ""));
+        int minute = Integer.parseInt(timeComponents[1].replaceAll("[^0-9]", ""));
+        if (alarmTime.contains("오후") && hour < 12) {
+            hour += 12;
+        } else if (alarmTime.contains("오전") && hour == 12) {
+            hour = 0;
+        }
+        return String.format("%02d:%02d", hour, minute);
     }
 
     private void loadAlarmsFromSharedPreferences() {
         SharedPreferences sharedPreferences = requireContext().getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
         Set<String> alarmsSet = sharedPreferences.getStringSet(ALARMS_KEY, new HashSet<>());
         alarms.clear(); // 기존 알람 리스트를 초기화
-        List<String> sortedAlarms = new ArrayList<>(alarmsSet);
-        Collections.sort(sortedAlarms); // 시간순으로 정렬
-        alarms.addAll(sortedAlarms); // 정렬된 알람 리스트를 추가
+        for (String alarm : alarmsSet) {
+            alarms.add(formatAlarmTimeForLoad(alarm));
+        }
+        Collections.sort(alarms); // 시간순으로 정렬
         updateAlarmList();
+    }
+    private String formatAlarmTimeForLoad(String alarmTime) {
+        // 24시간 형식의 시간을 12시간 형식으로 변환합니다.
+        String[] timeComponents = alarmTime.split(":");
+        int hour = Integer.parseInt(timeComponents[0]);
+        int minute = Integer.parseInt(timeComponents[1]);
+        String amPm;
+        if (hour == 0) {
+            hour = 12;
+            amPm = "오전";
+        } else if (hour < 12) {
+            amPm = "오전";
+        } else if (hour == 12) {
+            amPm = "오후";
+        } else {
+            amPm = "오후";
+            hour -= 12;
+        }
+        return String.format("%s %02d:%02d", amPm, hour, minute);
     }
 
     private boolean isAppInForeground() {
@@ -359,8 +399,8 @@ public class FragAlarm extends Fragment {
     private String formatAlarmTime(String alarmTime) {
         // 시간을 오전/오후 시간 형식으로 변환합니다.
         String[] timeComponents = alarmTime.split(":");
-        int hour = Integer.parseInt(timeComponents[0]);
-        int minute = Integer.parseInt(timeComponents[1]);
+        int hour = Integer.parseInt(timeComponents[0].replaceAll("[^0-9]", ""));
+        int minute = Integer.parseInt(timeComponents[1].replaceAll("[^0-9]", ""));
         String amPm;
         if (hour == 0) {
             hour = 12;
