@@ -17,11 +17,21 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import java.io.Serializable;
+import java.lang.reflect.Type;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import com.example.myapplication.R;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import android.app.TimePickerDialog;
 import android.widget.TimePicker;
 import android.app.AlarmManager;
@@ -34,6 +44,7 @@ import android.media.MediaPlayer;
 import android.os.SystemClock;
 import androidx.core.app.NotificationCompat;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.Set;
 import android.app.ActivityManager;
 import androidx.core.app.NotificationManagerCompat;
@@ -51,14 +62,14 @@ public class FragAlarm extends Fragment {
     private Button addAlarmButton;
     private Button deleteAlarmButton;
     private Button stopAlarmButton;
-    private List<String> alarms;
+    private List<Alarm> alarms= new ArrayList<>();;
     private AlarmManager alarmManager;
-    private PendingIntent alarmPendingIntent;
     private MediaPlayer mediaPlayer;
-    private ArrayAdapter<String> adapter;
+    private ArrayAdapter<Alarm> adapter;
     private List<Boolean> checkedStates;
     private String alarmTime;
     private static final String ALARMS_KEY = "alarms";
+
 
 
     private void showTimePickerDialog() {
@@ -74,8 +85,6 @@ public class FragAlarm extends Fragment {
                         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                             String time = String.format("%02d:%02d", hourOfDay, minute);
                             addAlarm(time);
-                            Log.d("set","set");
-                            alarmManager.set(AlarmManager.RTC_WAKEUP, 1000, alarmPendingIntent);
                         }
                     },
                     // 초기 시간 설정 (현재 시간)
@@ -97,29 +106,11 @@ public class FragAlarm extends Fragment {
                 public void onCompletion(MediaPlayer mp) {
                     mediaPlayer.release(); // MediaPlayer 해제
                     mediaPlayer = null;
-                    checkAlarms(); // 다음 알람 확인
-                    markAlarmAsRang(alarmTime);
+                    //markAlarmAsRang(alarmTime);
                     //updateAlarmList(); // 알람 리스트 갱신
                 }
             });
-        }/*
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (alarms.size() > 0) {
-                    mediaPlayer.start();
-
-                    // 앱이 꺼져 있을 때만 FragAlarmCalled 프래그먼트를 띄웁니다.
-                    if (!isAppInForeground()) {
-                        //Fragment fragAlarmCalled = new FragAlarmCalled();
-                        getParentFragmentManager().beginTransaction()
-                                //.replace(R.id.fragment_alarm_called, fragAlarmCalled, "FragAlarmCalled")
-                                .addToBackStack(null)
-                                .commit();
-                    }
-                }
-            }
-        }, delay);*/
+        }
     }
 
 
@@ -131,8 +122,12 @@ public class FragAlarm extends Fragment {
 
         // 입력된 알람 시간 파싱
         String[] timeComponents = alarmTime.split(":");
-        int alarmHour = Integer.parseInt(timeComponents[0]);
-        int alarmMinute = Integer.parseInt(timeComponents[1]);
+        int alarmHour = Integer.parseInt(timeComponents[0].replaceAll("[^0-9]", ""));
+        int alarmMinute = Integer.parseInt(timeComponents[1].replaceAll("[^0-9]", ""));
+
+        if (alarmTime.contains("오후") && alarmHour < 12) {
+            alarmHour += 12;
+        }
 
         // 알람 시간을 밀리초로 변환
         long currentTimeMillis = System.currentTimeMillis();
@@ -165,7 +160,8 @@ public class FragAlarm extends Fragment {
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         saveAlarmsToSharedPreferences();
-        outState.putStringArrayList(ALARMS_KEY, new ArrayList<>(alarms));
+        outState.putParcelableArrayList(ALARMS_KEY, new ArrayList<>(alarms));
+
     }
 
     @Override
@@ -176,26 +172,21 @@ public class FragAlarm extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        alarmManager =(AlarmManager)getContext().getSystemService(Context.ALARM_SERVICE);
         alarmListView = view.findViewById(R.id.alarmListView);
         addAlarmButton = view.findViewById(R.id.addAlarmButton);
         deleteAlarmButton = view.findViewById(R.id.deleteAlarmButton);
         stopAlarmButton = view.findViewById(R.id.stopAlarmButton);
-        alarms = new ArrayList<>();
         checkedStates = new ArrayList<>();
         adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_multiple_choice, alarms);
         alarmListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE); // 단일 선택 모드로 설정
         alarmListView.setAdapter(adapter);
-        alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
-        Intent alarmIntent = new Intent(requireContext(), AlarmReceiver.class);
-        alarmPendingIntent = PendingIntent.getBroadcast(requireContext(), 1, alarmIntent,  PendingIntent.FLAG_IMMUTABLE);
-
 
         // 나머지 초기화 작업 수행
         checkedStates.clear();
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(ALARMS_KEY)) {
-                List<String> savedAlarms = new ArrayList<>(savedInstanceState.getStringArrayList(ALARMS_KEY));
+                List<Alarm> savedAlarms = new ArrayList<>(savedInstanceState.getParcelableArrayList(ALARMS_KEY));
                 alarms.clear();
                 alarms.addAll(savedAlarms);
                 updateAlarmList();
@@ -208,30 +199,27 @@ public class FragAlarm extends Fragment {
         loadAlarmsFromSharedPreferences();
 
         setOnClickListeners();
-        checkAlarms();
-
+        updateAlarmList();
     }
 
     private void addAlarm(String alarmTime) {
-        alarms.add(alarmTime);
-        Collections.sort(alarms); // 시간순으로 정렬
+        Alarm a = new Alarm(alarmTime);
+        alarms.add(a);
         updateAlarmList();
-        //checkAlarms(); // 다음 알람 확인
 
         //알람 등록
-
         long alarmTimeMillis = calculateAlarmTime(alarmTime);
-        Log.d("alarmTime",alarmTimeMillis+"");
-        Intent receiverIntent = new Intent(getContext(), AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), 0, receiverIntent, PendingIntent.FLAG_IMMUTABLE);
+        Log.d("alarmTime",alarmTimeMillis+""+a.getAlarmId());
 
-        AlarmManager alarmManager =(AlarmManager)getContext().getSystemService(Context.ALARM_SERVICE);;
-        alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTimeMillis, pendingIntent);
+        Intent receiverIntent = new Intent(getContext(), AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), a.getAlarmId(), receiverIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+alarmTimeMillis, pendingIntent);
     }
 
     private void checkAlarms() {
         if (alarms.size() > 0) {
-            alarmTime = alarms.get(0);
+            alarmTime = alarms.get(0).getTime();
             long alarmTimeMillis = calculateAlarmTime(alarmTime);
             if (alarmTimeMillis > 0) {
                 playAlarmSound(alarmTimeMillis);
@@ -239,12 +227,10 @@ public class FragAlarm extends Fragment {
         }
     }
 
-    private void deleteAlarm(String alarmTime) {
-        if (alarms.contains(alarmTime)) {
-            alarms.remove(alarmTime);
+    private void deleteAlarm(Alarm selectedalarm) {
+        if (alarms.contains(selectedalarm)) {
+            alarms.remove(selectedalarm);
             updateAlarmList();
-            stopAlarm();
-            checkAlarms(); // 다음 알람 확인
         }
     }
 
@@ -257,14 +243,29 @@ public class FragAlarm extends Fragment {
             mediaPlayer = null;
 
             // 알람이 멈추면 "알람이 울렸습니다." 텍스트를 제거합니다.
-            removeRingingText();
+            //removeRingingText();
         }
     }
 
     private void updateAlarmList() {
+        Collections.sort(alarms, new Comparator<Alarm>() {
+            @Override
+            public int compare(Alarm alarm1, Alarm alarm2) {
+                SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.KOREA);
+                try {
+                    Date time1 = timeFormat.parse(alarm1.getTime());
+                    Date time2 = timeFormat.parse(alarm2.getTime());
+                    return time1.compareTo(time2);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    return 0;
+                }
+            }
+        });
         List<String> formattedAlarms = new ArrayList<>();
-        for (String alarm : alarms) {
-            formattedAlarms.add(formatAlarmTime(alarm));
+        for (Alarm alarm : alarms) {
+            Log.d("alarm",formatAlarmTime(alarm.getTime()));
+            formattedAlarms.add(formatAlarmTime(alarm.getTime()));
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, formattedAlarms);
         alarmListView.setAdapter(adapter);
@@ -287,8 +288,13 @@ public class FragAlarm extends Fragment {
             public void onClick(View v) {
                 int checkedItemPosition = alarmListView.getCheckedItemPosition();
                 if (checkedItemPosition != AdapterView.INVALID_POSITION) {
-                    String selectedAlarm = alarms.get(checkedItemPosition);
+                    Alarm selectedAlarm = alarms.get(checkedItemPosition);
+                    Intent intent = new Intent(requireContext(), FragAlarmCalled.class); // YourAlarmReceiver는 실제 사용하는 BroadcastReceiver 클래스로 변경
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(requireContext(), selectedAlarm.getAlarmId(), intent, PendingIntent.FLAG_IMMUTABLE);
+                    alarmManager.cancel(pendingIntent);
+
                     deleteAlarm(selectedAlarm);
+
                 }
             }
         });
@@ -329,20 +335,25 @@ public class FragAlarm extends Fragment {
     }
 
     private void saveAlarmsToSharedPreferences() {
-        SharedPreferences sharedPreferences = requireContext().getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = requireContext().getSharedPreferences("MySharedPrefAlarm", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        Set<String> alarmsSet = new HashSet<>(alarms);
-        editor.putStringSet(ALARMS_KEY, alarmsSet);
+
+        Gson gson = new Gson();
+        String alarmsJson = gson.toJson(alarms);
+
+        editor.putString(ALARMS_KEY, alarmsJson);
         editor.apply();
     }
 
     private void loadAlarmsFromSharedPreferences() {
-        SharedPreferences sharedPreferences = requireContext().getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
-        Set<String> alarmsSet = sharedPreferences.getStringSet(ALARMS_KEY, new HashSet<>());
+        SharedPreferences sharedPreferences = requireContext().getSharedPreferences("MySharedPrefAlarm", Context.MODE_PRIVATE);
+        String alarmsJson = sharedPreferences.getString(ALARMS_KEY, "");
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<Alarm>>() {}.getType();
+        ArrayList a = gson.fromJson(alarmsJson, type);
         alarms.clear(); // 기존 알람 리스트를 초기화
-        List<String> sortedAlarms = new ArrayList<>(alarmsSet);
-        Collections.sort(sortedAlarms); // 시간순으로 정렬
-        alarms.addAll(sortedAlarms); // 정렬된 알람 리스트를 추가
+        if(a!=null)
+            alarms.addAll(a); // 정렬된 알람 리스트를 추가
         updateAlarmList();
     }
 
@@ -359,7 +370,7 @@ public class FragAlarm extends Fragment {
         return false;
     }
 
-    private void markAlarmAsRang(String alarmTime) {
+   /* private void markAlarmAsRang(String alarmTime) {
         int index = alarms.indexOf(alarmTime);
         if (index != -1) {
             String markedAlarm = alarms.get(index);
@@ -369,13 +380,13 @@ public class FragAlarm extends Fragment {
                 updateAlarmList();
             }
         }
-    }
+    }*/
 
     private String formatAlarmTime(String alarmTime) {
         // 시간을 오전/오후 시간 형식으로 변환합니다.
         String[] timeComponents = alarmTime.split(":");
-        int hour = Integer.parseInt(timeComponents[0]);
-        int minute = Integer.parseInt(timeComponents[1]);
+        int hour = Integer.parseInt(timeComponents[0].replaceAll("[^0-9]", ""));
+        int minute = Integer.parseInt(timeComponents[1].replaceAll("[^0-9]", ""));
         String amPm;
         if (hour == 0) {
             hour = 12;
@@ -391,7 +402,7 @@ public class FragAlarm extends Fragment {
         return String.format("%s %02d:%02d", amPm, hour, minute);
     }
 
-    private void removeRingingText() {
+    /*private void removeRingingText() {
         for (int i = 0; i < alarms.size(); i++) {
             if (alarms.get(i).contains("알람이 울렸습니다.")) {
                 String unmarkedAlarm = alarms.get(i).replace(" - 알람이 울렸습니다.", "");
@@ -401,5 +412,5 @@ public class FragAlarm extends Fragment {
             }
         }
 
-    }
+    }*/
 }

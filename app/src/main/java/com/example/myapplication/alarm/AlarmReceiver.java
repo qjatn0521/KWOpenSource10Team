@@ -18,11 +18,9 @@ import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
 
 public class AlarmReceiver extends BroadcastReceiver {
-    private static String CHANNEL_ID = "channel1";
-    private static String CHANNEL_NAME = "Channel1";
     @Override
     public void onReceive(Context context, Intent intent) {
-
+        Log.d("receiced!","dasdas");
         Intent alarmIntent = new Intent(context, FragAlarmCalled.class);
         alarmIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(alarmIntent);

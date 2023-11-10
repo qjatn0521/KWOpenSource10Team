@@ -36,11 +36,7 @@
         <receiver android:name=".sports.noti.NotificationReceiver"/>
         <activity android:name=".alarm.FragAlarm"/>
         <activity android:name=".alarm.FragAlarmCalled"/>
-        <receiver android:name=".alarm.AlarmReceiver"
-            android:exported="false">
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
+        <receiver android:name=".alarm.AlarmReceiver">
         </receiver>
     </application>
 

@@ -42,7 +42,8 @@ public class NotificationReceiver extends BroadcastReceiver {
             );
             builder = new NotificationCompat.Builder(context, CHANNEL_ID);
         } else {
-            builder = new NotificationCompat.Builder(context);        }
+            builder = new NotificationCompat.Builder(context);
+        }
 
 
 

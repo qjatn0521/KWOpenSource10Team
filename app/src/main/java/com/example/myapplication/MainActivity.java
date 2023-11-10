@@ -9,7 +9,10 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -20,6 +23,7 @@ import android.util.Log;
 import android.view.MenuItem;
 
 // import com.example.myapplication.alarm.FragAlarm;
+import com.example.myapplication.alarm.AlarmReceiver;
 import com.example.myapplication.alarm.FragAlarm;
 import com.example.myapplication.alarm.PermissionUtils;
 import com.example.myapplication.weather.api.UltraSrtNcstAPI;
@@ -70,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
                 return loadFragment(fragment);
             }
         });
+
     }
 
     private boolean loadFragment(Fragment fragment) {
