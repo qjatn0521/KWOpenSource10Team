@@ -212,6 +212,7 @@ public class FragAlarm extends Fragment {
         Log.d("alarmTime",alarmTimeMillis+""+a.getAlarmId());
 
         Intent receiverIntent = new Intent(getContext(), AlarmReceiver.class);
+        Log.d("add ID", a.getAlarmId()+"");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), a.getAlarmId(), receiverIntent, PendingIntent.FLAG_IMMUTABLE);
 
         alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+alarmTimeMillis, pendingIntent);
@@ -289,7 +290,8 @@ public class FragAlarm extends Fragment {
                 int checkedItemPosition = alarmListView.getCheckedItemPosition();
                 if (checkedItemPosition != AdapterView.INVALID_POSITION) {
                     Alarm selectedAlarm = alarms.get(checkedItemPosition);
-                    Intent intent = new Intent(requireContext(), FragAlarmCalled.class); // YourAlarmReceiver는 실제 사용하는 BroadcastReceiver 클래스로 변경
+                    Intent intent = new Intent(requireContext(), AlarmReceiver.class);
+                    Log.d("del ID", selectedAlarm.getAlarmId()+"");
                     PendingIntent pendingIntent = PendingIntent.getBroadcast(requireContext(), selectedAlarm.getAlarmId(), intent, PendingIntent.FLAG_IMMUTABLE);
                     alarmManager.cancel(pendingIntent);
 
