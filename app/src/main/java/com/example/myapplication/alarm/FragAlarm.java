@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -214,7 +215,6 @@ public class FragAlarm extends Fragment {
 
     private void addAlarm(String alarmTime) {
         alarms.add(alarmTime);
-        Collections.sort(alarms); // 시간순으로 정렬
         updateAlarmList();
         checkAlarms(); // 다음 알람 확인
     }
@@ -235,6 +235,7 @@ public class FragAlarm extends Fragment {
             updateAlarmList();
             stopAlarm();
             checkAlarms(); // 다음 알람 확인
+            saveAlarmsToSharedPreferences(); // 삭제 후 알람을 저장합니다.
         }
     }
 
@@ -256,10 +257,17 @@ public class FragAlarm extends Fragment {
         for (String alarm : alarms) {
             formattedAlarms.add(formatAlarmTime(alarm));
         }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, formattedAlarms);
+
+        // 추가된 부분: 알람 리스트가 갱신되면 SharedPreferences에 저장합니다.
+        saveAlarmsToSharedPreferences();
+
+        Collections.sort(alarms); // 시간순으로 정렬
+
+        // 기존의 어댑터를 재사용하는 대신, 새로운 어댑터를 생성하여 설정합니다.
+        // 이렇게 하면 기존의 알람이 삭제될 때 올바르게 갱신됩니다.
+        adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, formattedAlarms);
         alarmListView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
-
     }
 
     private void setOnClickListeners() {
@@ -350,6 +358,7 @@ public class FragAlarm extends Fragment {
         }
         Collections.sort(alarms); // 시간순으로 정렬
         updateAlarmList();
+        checkAlarms();
     }
     private String formatAlarmTimeForLoad(String alarmTime) {
         // 24시간 형식의 시간을 12시간 형식으로 변환합니다.
@@ -402,18 +411,20 @@ public class FragAlarm extends Fragment {
         int hour = Integer.parseInt(timeComponents[0].replaceAll("[^0-9]", ""));
         int minute = Integer.parseInt(timeComponents[1].replaceAll("[^0-9]", ""));
         String amPm;
-        if (hour == 0) {
-            hour = 12;
+        if (hour < 12) {
             amPm = "오전";
-        } else if (hour < 12) {
-            amPm = "오전";
-        } else if (hour == 12) {
-            amPm = "오후";
+            if (hour == 0) {
+                hour = 12;
+            }
         } else {
             amPm = "오후";
-            hour -= 12;
+            if (hour > 12) {
+                hour -= 12;
+            }
         }
-        return String.format("%s %02d:%02d", amPm, hour, minute);
+        String formattedTime = String.format("%s %02d:%02d", amPm, hour, minute);
+        Log.d("FormatAlarmTime", "Original: " + alarmTime + " Formatted: " + formattedTime);
+        return formattedTime;
     }
 
     private void removeRingingText() {
