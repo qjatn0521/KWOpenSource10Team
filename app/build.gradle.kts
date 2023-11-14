@@ -67,6 +67,9 @@ dependencies {
     implementation ("androidx.room:room-runtime:2.2.6")
     annotationProcessor ("androidx.room:room-compiler:2.2.6")
 
+    //gif
+    implementation ("com.github.bumptech.glide:glide:3.7.0")
+
 
     implementation ("androidx.core:core-ktx:1.7.0")
 }

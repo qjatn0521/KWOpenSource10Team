@@ -29,7 +29,9 @@ public class NotificationReceiver extends BroadcastReceiver {
     //수신되는 인텐트 - The Intent being received.
     @Override
     public void onReceive(Context context, Intent intent) {
-        String contentValue = intent.getStringExtra("title");
+        String titleValue = intent.getStringExtra("title");
+        String timeValue = intent.getStringExtra("time");
+        int idValue = intent.getIntExtra("id",0);
         builder = null;
 
         //푸시 알림을 보내기위해 시스템에 권한을 요청하여 생성
@@ -48,8 +50,8 @@ public class NotificationReceiver extends BroadcastReceiver {
 
 
         //알림창 제목
-        builder.setContentTitle(contentValue) //회의명노출
-            .setContentText("오") //회의 내용
+        builder.setContentTitle(titleValue) //회의명노출
+            .setContentText(timeValue) //회의 내용
             .setSound(null)
         //알림창 아이콘
             .setSmallIcon(R.drawable.image_sprots_soccerball)
@@ -57,6 +59,7 @@ public class NotificationReceiver extends BroadcastReceiver {
             .setAutoCancel(true);
 
         //NotificationManager를 이용하여 푸시 알림 보내기
-        manager.notify(100,builder.build());
+        manager.notify(idValue,builder.build());
     }
+
 }

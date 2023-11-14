@@ -262,15 +262,16 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
                 // 파싱에 실패하면 기본값을 반환 또는 오류 처리
                 //Log.d("errorCal","errr");
                 return 0;
+
             }
         }
-        @RequiresApi(api = Build.VERSION_CODES.O)
         private void setNotice(FixtureDB f) {
             //알람을 수신할 수 있도록 하는 리시버로 인텐트 요청
             Intent receiverIntent = new Intent(itemView.getContext(), NotificationReceiver.class);
             receiverIntent.putExtra("title", f.homeTeamName+" vs"+f.awayTeamName);
+            receiverIntent.putExtra("id", f.fixtureId);
+            receiverIntent.putExtra("time",f.timeString);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(itemView.getContext(), f.fixtureId, receiverIntent, PendingIntent.FLAG_IMMUTABLE);
-
             //알람시간 설정
             //param 1)알람의 타입
             //param 2)알람이 울려야 하는 시간(밀리초)을 나타낸다.

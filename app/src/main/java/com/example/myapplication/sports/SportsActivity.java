@@ -14,6 +14,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,6 +30,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.example.myapplication.R;
 import com.example.myapplication.databinding.ActivityNotiSportsBinding;
 import com.example.myapplication.sports.adapter.TeamAdapter;
@@ -34,19 +40,30 @@ import com.example.myapplication.sports.database.FixtureDBDao;
 import com.example.myapplication.sports.database.FixtureDatabase;
 import com.example.myapplication.sports.model.Fixture;
 import com.example.myapplication.sports.model.Team;
+import com.example.myapplication.todo.TodoActivity;
 
 
 import java.util.List;
 import java.util.Objects;
 
 public class SportsActivity extends AppCompatActivity {
-    private ActivityNotiSportsBinding binding;
     private RecyclerView rvTeam;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_noti_sports);
-        binding = ActivityNotiSportsBinding.inflate(getLayoutInflater());
+
+        ImageView loadingIv = findViewById(R.id.loading_iv);
+        GlideDrawableImageViewTarget gifImage = new GlideDrawableImageViewTarget(loadingIv);
+        Glide.with(this).load(R.drawable.loading).into(gifImage);
+        ImageView backbtn = findViewById(R.id.back_btn);
+        backbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
         CustomSharedPreferences customPreferences = new CustomSharedPreferences(this);
         int leagueId = customPreferences.getCountryId();
 
@@ -69,11 +86,12 @@ public class SportsActivity extends AppCompatActivity {
                     rvTeam.setLayoutManager(layoutManager);
                     rvTeam.setAdapter(adapter);
                 }
-
+                findViewById(R.id.loading_layout).setVisibility(View.GONE);
             }
         });
-
     }
+
+
     private void checkFixturesForTeamInBackground(Team team) {
         new AsyncTask<Void, Void, Integer>() {
             @Override
