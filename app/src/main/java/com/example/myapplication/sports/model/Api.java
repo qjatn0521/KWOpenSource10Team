@@ -9,10 +9,13 @@ public class Api {
 
     @SerializedName("teams")
     private List<Team> teams;
+    @SerializedName("fixtures")
+    private List<Fixture> fixtures;
 
     public int getResults() {
         return results;
     }
+
 
     public void setResults(int results) {
         this.results = results;
@@ -20,6 +23,9 @@ public class Api {
 
     public List<Team> getTeams() {
         return teams;
+    }
+    public List<Fixture> getFixtures() {
+        return fixtures;
     }
 
     public void setTeams(List<Team> teams) {

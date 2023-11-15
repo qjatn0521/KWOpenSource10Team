@@ -1,8 +1,11 @@
 package com.example.myapplication.sports.model;
 
+import android.util.Log;
+
 import com.google.gson.annotations.SerializedName;
 
 public class Team {
+    private boolean subscribe = false;
     @SerializedName("team_id")
     private int teamId;
 
@@ -43,95 +46,18 @@ public class Team {
         return teamId;
     }
 
-    public void setTeamId(int teamId) {
-        this.teamId = teamId;
-    }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Object getCode() {
-        return code;
-    }
-
-    public void setCode(Object code) {
-        this.code = code;
-    }
-
     public String getLogo() {
         return logo;
     }
-
-    public void setLogo(String logo) {
-        this.logo = logo;
+    public Boolean getSub() {
+        return subscribe;
     }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public boolean isNational() {
-        return isNational;
-    }
-
-    public void setNational(boolean national) {
-        isNational = national;
-    }
-
-    public int getFounded() {
-        return founded;
-    }
-
-    public void setFounded(int founded) {
-        this.founded = founded;
-    }
-
-    public String getVenueName() {
-        return venueName;
-    }
-
-    public void setVenueName(String venueName) {
-        this.venueName = venueName;
-    }
-
-    public String getVenueSurface() {
-        return venueSurface;
-    }
-
-    public void setVenueSurface(String venueSurface) {
-        this.venueSurface = venueSurface;
-    }
-
-    public String getVenueAddress() {
-        return venueAddress;
-    }
-
-    public void setVenueAddress(String venueAddress) {
-        this.venueAddress = venueAddress;
-    }
-
-    public String getVenueCity() {
-        return venueCity;
-    }
-
-    public void setVenueCity(String venueCity) {
-        this.venueCity = venueCity;
-    }
-
-    public int getVenueCapacity() {
-        return venueCapacity;
-    }
-
-    public void setVenueCapacity(int venueCapacity) {
-        this.venueCapacity = venueCapacity;
+    public void setSub() {
+        subscribe = true;
     }
 }

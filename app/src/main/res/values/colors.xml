@@ -4,4 +4,6 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="soccer">#123456</color>
+    <color name="loading_bg">#40808080</color>
+    <color name="main">#71B1E5</color>
 </resources>

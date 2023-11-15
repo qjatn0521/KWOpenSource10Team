@@ -15,8 +15,9 @@ public interface ApiService {
     Single<TeamResponse> getAllTeamsOfLeague(@Path("league_id") int leagueId);
 
     @Headers(Constant.API_KEY)
-    @GET(Constant.GET_ALL_FIXTURE_OF_LEAGUE)
-    Single<FixtureResponse> getAllFixtureOfLeague(@Path("league_id") int leagueId);
+    @GET(Constant.GET_TEAM_FIXTURE_OF_LEAGUE)
+    Single<FixtureResponse> getAllFixtureOfTeam(@Path("team_id") int teamId);
+
 
     /*@Headers(Constant.API_KEY)
     @GET(Constant.GET_LEAGUE_TABLE)
@@ -36,11 +37,11 @@ public interface ApiService {
     @GET(Constant.GET_ALL_TRANSFERS_OF_TEAM)
     Single<TransferResponse> getAllTransfersOfTeam(@Path("team_id") int teamId);
 
-
-
-    @Headers(Constant.API_KEY)
+@Headers(Constant.API_KEY)
     @GET(Constant.GET_ALL_H2H_ITEMS)
     Single<H2HResponse> getAllH2hItems(@Path("home_team_id") int homeTeamId, @Path("away_team_id") int awayTeamId);
+
+
 
     @Headers(Constant.API_KEY)
     @GET(Constant.GET_FIXTURE_STATISTICS)

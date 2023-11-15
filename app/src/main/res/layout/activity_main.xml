@@ -4,22 +4,33 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+
     android:orientation="vertical">
     <FrameLayout
         android:id="@+id/main_frame"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        />
+        >
+
+    </FrameLayout>
+
+    <View
+        android:id="@+id/divider2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:background="@color/white"
-        app:itemBackground="@color/white"
+        app:itemIconSize="30dp"
+        app:itemIconTint="@drawable/etc_menu_selector_color"
+        app:itemActiveIndicatorStyle="@null"
         app:labelVisibilityMode="unlabeled"
-        app:menu="@menu/bottom_menu"
-        />
+        app:menu="@menu/bottom_menu" />
 
 
 </LinearLayout>
