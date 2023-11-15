@@ -28,10 +28,9 @@ import com.example.myapplication.alarm.FragAlarm;
 import com.example.myapplication.alarm.PermissionUtils;
 import com.example.myapplication.weather.api.UltraSrtNcstAPI;
 import com.example.myapplication.weather.api.VillageFcstAPI;
-import com.example.myapplication.weather.api.WeatherAPI;
-import com.example.myapplication.weather.domain.VillageFcstData;
-import com.example.myapplication.weather.weatherAPI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -58,6 +57,9 @@ public class MainActivity extends AppCompatActivity {
             // 권한이 부여되지 않았으므로 요청
             PermissionUtils.requestSystemAlertWindowPermission(this);
         }
+
+
+        // loadFragment(new FragAlarm());
 
         // 바텀 네비게이션 아이템 클릭 이벤트 처리
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {

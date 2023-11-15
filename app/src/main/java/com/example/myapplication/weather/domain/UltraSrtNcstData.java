@@ -1,14 +1,16 @@
+/** 날씨도 데이터베이스 사용이 필요하면 이 코드를 사용하자 */
+
+/*
 package com.example.myapplication.weather.domain;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/** 초단기 예보 데이터 */
 public class UltraSrtNcstData {
-    private List<String> baseDate;
-    private List<String> baseTime;
-    private List<String> category;
-    private List<String> obsrValue;
+    private List<String> baseDate = new ArrayList<>();
+    private List<String> baseTime = new ArrayList<>();
+    private List<String> category = new ArrayList<>();
+    private List<String> obsrValue = new ArrayList<>();
 
     // 기본 생성자로 arrayList 객체 생성
     public UltraSrtNcstData(){
@@ -43,3 +45,5 @@ public class UltraSrtNcstData {
         return obsrValue;
     }
 }
+
+ */

@@ -12,11 +12,18 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
-public class UltraSrtNcstAPI implements WeatherAPI {
+public class UltraSrtNcstAPI{
     private StringBuilder urlBuilder;
     private final String endKey = "WGbZ3y8YenvWEK4%2FwabF0QlpEw7Noxa3vg5aso798whVG8O7rV3ZqyP%2BmL44LY4ouI4LjZOJf8GbBgGR5kRp4g%3D%3D"; /* 인코딩 키 */
 
+    private List<String> baseDate = new ArrayList<>();
+    private List<String> baseTime = new ArrayList<>();
+    private List<String> category = new ArrayList<>();
+    private List<String> obsrValue = new ArrayList<>();
+    private String bd, bt, cg, ob;
 
     public UltraSrtNcstAPI(String baseDate, String baseTime, String nx, String ny) {
         this.urlBuilder = new StringBuilder("http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst"); /* 단기예보 URL*/
@@ -39,12 +46,22 @@ public class UltraSrtNcstAPI implements WeatherAPI {
         return urlBuilder;
     }
 
-    @Override
-    public void saveItem(){
 
+    public void saveItem() {
+        baseDate.add(bd);
+        baseTime.add(bt);
+        category.add(cg);
+        obsrValue.add(ob);
     }
 
-    @Override
+
+    public void parseItem(JSONObject jsonObj_4) throws JSONException{
+        bd = jsonObj_4.getString("baseDate");
+        bt = jsonObj_4.getString("baseTime");
+        cg = jsonObj_4.getString("category");
+        ob = jsonObj_4.getString("obsrValue");
+    }
+
     public void getAPI() throws IOException {
         URL url = new URL(urlBuilder.toString());
 
@@ -95,17 +112,30 @@ public class UltraSrtNcstAPI implements WeatherAPI {
             // items로 부터 itemlist 를 받기
             JSONObject jsonObj_4 = new JSONObject(items);
             JSONArray jsonArray = jsonObj_4.getJSONArray("item");
-            String weather;
-            String tmperature;
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 jsonObj_4 = jsonArray.getJSONObject(i);
-                Log.d("items", jsonObj_4.toString());
-                String category = jsonObj_4.getString("category");
-                Log.d("category", category);
+                parseItem(jsonObj_4);
+                saveItem();
             }
         } catch (JSONException e){
             System.out.println("e = " + e);
         }
+    }
+
+    public List<String> getBaseDate() {
+        return baseDate;
+    }
+
+    public List<String> getBaseTime() {
+        return baseTime;
+    }
+
+    public List<String> getCategory() {
+        return category;
+    }
+
+    public List<String> getObsrValue() {
+        return obsrValue;
     }
 }
