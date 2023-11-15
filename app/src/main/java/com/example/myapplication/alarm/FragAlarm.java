@@ -1,9 +1,12 @@
 package com.example.myapplication.alarm;
 
 import android.content.SharedPreferences;
+import android.icu.text.SimpleDateFormat;
+import android.net.ParseException;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,11 +19,18 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import com.example.myapplication.R;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import android.app.TimePickerDialog;
 import android.widget.TimePicker;
 import android.app.AlarmManager;
@@ -33,6 +43,7 @@ import android.media.MediaPlayer;
 import android.os.SystemClock;
 import androidx.core.app.NotificationCompat;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.Set;
 import android.app.ActivityManager;
 import androidx.core.app.NotificationManagerCompat;
@@ -163,7 +174,6 @@ public class FragAlarm extends Fragment {
         alarmListView = view.findViewById(R.id.alarmListView);
         addAlarmButton = view.findViewById(R.id.addAlarmButton);
         deleteAlarmButton = view.findViewById(R.id.deleteAlarmButton);
-        stopAlarmButton = view.findViewById(R.id.stopAlarmButton);
         checkedStates = new ArrayList<>();
         adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_multiple_choice, alarms);
         alarmListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE); // 단일 선택 모드로 설정
@@ -222,18 +232,6 @@ public class FragAlarm extends Fragment {
         }
     }
 
-    private void stopAlarm() {
-        if (mediaPlayer != null) {
-            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.stop();
-            }
-            mediaPlayer.release();
-            mediaPlayer = null;
-
-            // 알람이 멈추면 "알람이 울렸습니다." 텍스트를 제거합니다.
-            //removeRingingText();
-        }
-    }
 
     private void updateAlarmList() {
         Collections.sort(alarms, new Comparator<Alarm>() {
@@ -247,6 +245,8 @@ public class FragAlarm extends Fragment {
                 } catch (ParseException e) {
                     e.printStackTrace();
                     return 0;
+                } catch (java.text.ParseException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });
@@ -258,7 +258,7 @@ public class FragAlarm extends Fragment {
 
         Collections.sort(formattedAlarms); // 시간순으로 정렬된 문자열 리스트
 
-        adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, formattedAlarms);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, formattedAlarms);
         alarmListView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
 
@@ -291,12 +291,6 @@ public class FragAlarm extends Fragment {
             }
         });
 
-        stopAlarmButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stopAlarm();
-            }
-        });
 
         alarmListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

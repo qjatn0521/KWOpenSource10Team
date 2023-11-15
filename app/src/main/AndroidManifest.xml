@@ -35,7 +35,7 @@
         <activity android:name=".sports.SportsActivity"/>
         <activity android:name=".todo.TodoActivity"/>
         <receiver android:name=".sports.noti.NotificationReceiver"/>
-        <activity android:name=".alarm.FragAlarm"/>
+        <activity android:name=".alarm.FragAlarm" />
         <activity android:name=".alarm.FragAlarmCalled"/>
         <receiver android:name=".alarm.AlarmReceiver">
         </receiver>
