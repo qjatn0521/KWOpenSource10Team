@@ -36,16 +36,12 @@
         <activity android:name=".weather.WeatherActivity"/>
         <activity android:name=".sports.SportsActivity"/>
         <activity android:name=".todo.TodoActivity"/>
-        <activity android:name=".alarm.FragAlarm"/>
+        <receiver android:name=".sports.noti.NotificationReceiver"/>
+        <activity android:name=".alarm.FragAlarm" />
         <activity android:name=".alarm.FragAlarmCalled"/>
-        <receiver android:name=".alarm.AlarmReceiver"/>
-        <receiver android:name=".sports.noti.NotificationReceiver"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
+        <receiver android:name=".alarm.AlarmReceiver">
         </receiver>
     </application>
+
 
 </manifest>

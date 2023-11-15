@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -31,6 +32,8 @@ public class FragAlarmCalled extends Activity {
     private TodaySchedule adapter =new TodaySchedule();
     private  RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this);
     private RecyclerView sportsRv;
+    private MediaPlayer mediaPlayer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +43,7 @@ public class FragAlarmCalled extends Activity {
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         Button btnExit = findViewById(R.id.GoOffButton);
+        playAlarmSound();
 
         //알람 다음날 재설정
         int id = getIntent().getIntExtra("id", 0); // 0 is the default value if "id" is not found
@@ -61,7 +65,9 @@ public class FragAlarmCalled extends Activity {
         btnExit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.exit(0);
+
+                stopAlarmSound();
+                finish();
             }
         });
 
@@ -118,5 +124,26 @@ public class FragAlarmCalled extends Activity {
                 sportsRv.setAdapter(adapter);
             }
         }
+    }
+    // 알람 노래를 재생하는 함수
+    private void playAlarmSound() {
+        mediaPlayer = MediaPlayer.create(this, R.raw.alarm_sound); // 알람 소리 파일을 raw 폴더에 넣고 사용
+        mediaPlayer.setLooping(true); // 반복 재생 설정
+        mediaPlayer.start(); // 재생 시작
+    }
+
+    // 알람 노래를 멈추는 함수
+    private void stopAlarmSound() {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop(); // 노래 정지
+            mediaPlayer.release(); // 미디어 플레이어 리소스 해제
+            mediaPlayer = null;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopAlarmSound(); // Activity가 종료될 때 노래 정지 및 리소스 해제
     }
 }

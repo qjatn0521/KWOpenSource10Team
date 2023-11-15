@@ -1,6 +1,8 @@
 package com.example.myapplication.alarm;
 
 import android.content.SharedPreferences;
+import android.icu.text.SimpleDateFormat;
+import android.net.ParseException;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.os.Handler;
@@ -18,10 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import java.io.Serializable;
 import java.lang.reflect.Type;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -71,7 +70,6 @@ public class FragAlarm extends Fragment {
     private static final String ALARMS_KEY = "alarms";
 
 
-
     private void showTimePickerDialog() {
         try {
             Calendar currentTime = Calendar.getInstance();
@@ -106,8 +104,7 @@ public class FragAlarm extends Fragment {
                 public void onCompletion(MediaPlayer mp) {
                     mediaPlayer.release(); // MediaPlayer 해제
                     mediaPlayer = null;
-                    //markAlarmAsRang(alarmTime);
-                    //updateAlarmList(); // 알람 리스트 갱신
+
                 }
             });
         }
@@ -176,7 +173,6 @@ public class FragAlarm extends Fragment {
         alarmListView = view.findViewById(R.id.alarmListView);
         addAlarmButton = view.findViewById(R.id.addAlarmButton);
         deleteAlarmButton = view.findViewById(R.id.deleteAlarmButton);
-        stopAlarmButton = view.findViewById(R.id.stopAlarmButton);
         checkedStates = new ArrayList<>();
         adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_multiple_choice, alarms);
         alarmListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE); // 단일 선택 모드로 설정
@@ -243,18 +239,6 @@ public class FragAlarm extends Fragment {
         }
     }
 
-    private void stopAlarm() {
-        if (mediaPlayer != null) {
-            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.stop();
-            }
-            mediaPlayer.release();
-            mediaPlayer = null;
-
-            // 알람이 멈추면 "알람이 울렸습니다." 텍스트를 제거합니다.
-            //removeRingingText();
-        }
-    }
 
     private void updateAlarmList() {
         Collections.sort(alarms, new Comparator<Alarm>() {
@@ -268,6 +252,8 @@ public class FragAlarm extends Fragment {
                 } catch (ParseException e) {
                     e.printStackTrace();
                     return 0;
+                } catch (java.text.ParseException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });
@@ -276,6 +262,9 @@ public class FragAlarm extends Fragment {
             Log.d("alarm",formatAlarmTime(alarm.getTime()));
             formattedAlarms.add(formatAlarmTime(alarm.getTime()));
         }
+
+        Collections.sort(formattedAlarms); // 시간순으로 정렬된 문자열 리스트
+
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, formattedAlarms);
         alarmListView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
@@ -309,12 +298,6 @@ public class FragAlarm extends Fragment {
             }
         });
 
-        stopAlarmButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stopAlarm();
-            }
-        });
 
         alarmListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -377,6 +360,7 @@ public class FragAlarm extends Fragment {
         if(a!=null)
             alarms.addAll(a); // 정렬된 알람 리스트를 추가
         updateAlarmList();
+        checkAlarms();
     }
     private String formatAlarmTimeForLoad(String alarmTime) {
         // 24시간 형식의 시간을 12시간 형식으로 변환합니다.
@@ -384,6 +368,7 @@ public class FragAlarm extends Fragment {
         int hour = Integer.parseInt(timeComponents[0]);
         int minute = Integer.parseInt(timeComponents[1]);
         String amPm;
+
         if (hour == 0) {
             hour = 12;
             amPm = "오전";
@@ -411,47 +396,32 @@ public class FragAlarm extends Fragment {
         return false;
     }
 
-   /* private void markAlarmAsRang(String alarmTime) {
-        int index = alarms.indexOf(alarmTime);
-        if (index != -1) {
-            String markedAlarm = alarms.get(index);
-            if (!markedAlarm.contains("알람 ON")) {
-                markedAlarm = markedAlarm + " - 알람 ON.";
-                alarms.set(index, markedAlarm);
-                updateAlarmList();
-            }
-        }
-    }*/
 
     private String formatAlarmTime(String alarmTime) {
         // 시간을 오전/오후 시간 형식으로 변환합니다.
+        if (alarmTime.contains("오전") || alarmTime.contains("오후")) {
+            return alarmTime; // 이미 오전/오후가 포함된 문자열이라면 그대로 반환
+        }
+
         String[] timeComponents = alarmTime.split(":");
         int hour = Integer.parseInt(timeComponents[0].replaceAll("[^0-9]", ""));
         int minute = Integer.parseInt(timeComponents[1].replaceAll("[^0-9]", ""));
         String amPm;
-        if (hour == 0) {
-            hour = 12;
+        if (hour < 12) {
             amPm = "오전";
-        } else if (hour < 12) {
-            amPm = "오전";
-        } else if (hour == 12) {
-            amPm = "오후";
+            if (hour == 0) {
+                hour = 12;
+            }
         } else {
             amPm = "오후";
-            hour -= 12;
-        }
-        return String.format("%s %02d:%02d", amPm, hour, minute);
-    }
-
-    /*private void removeRingingText() {
-        for (int i = 0; i < alarms.size(); i++) {
-            if (alarms.get(i).contains("알람이 울렸습니다.")) {
-                String unmarkedAlarm = alarms.get(i).replace(" - 알람이 울렸습니다.", "");
-                alarms.set(i, unmarkedAlarm);
-                updateAlarmList();
-                break;
+            if (hour > 12) {
+                hour -= 12;
             }
         }
+        String formattedTime = String.format("%s %02d:%02d", amPm, hour, minute);
+        Log.d("FormatAlarmTime", "Original: " + alarmTime + " Formatted: " + formattedTime);
+        return formattedTime;
+    }
 
-    }*/
+    
 }
