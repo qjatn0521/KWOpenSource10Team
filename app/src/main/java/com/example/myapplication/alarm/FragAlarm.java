@@ -212,6 +212,8 @@ public class FragAlarm extends Fragment {
         Log.d("alarmTime",alarmTimeMillis+""+a.getAlarmId());
 
         Intent receiverIntent = new Intent(getContext(), AlarmReceiver.class);
+        receiverIntent.putExtra("id", a.getAlarmId());
+        receiverIntent.putExtra("id", a.getAlarmId());
         Log.d("add ID", a.getAlarmId()+"");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), a.getAlarmId(), receiverIntent, PendingIntent.FLAG_IMMUTABLE);
 

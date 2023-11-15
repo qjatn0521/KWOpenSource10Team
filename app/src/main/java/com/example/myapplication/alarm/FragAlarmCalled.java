@@ -20,8 +20,12 @@ public class FragAlarmCalled extends Activity {
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-
         Button btnExit = findViewById(R.id.GoOffButton);
+
+
+
+
+
 
         btnExit.setOnClickListener(new View.OnClickListener() {
             @Override
