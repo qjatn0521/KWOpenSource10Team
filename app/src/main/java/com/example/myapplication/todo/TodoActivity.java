@@ -1,17 +1,30 @@
 package com.example.myapplication.todo;
 
-import android.os.Bundle;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import androidx.annotation.Nullable;
+import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.R;
 
-public class TodoActivity extends AppCompatActivity {
+public class TodoActivity extends AppCompatActivity{
+
+    private static final String TAG="Todo_Activity";
+    private RecyclerView rvTodo;
+
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_todo);
-        //TextView tv1 = findViewById(R.id.textView); 이런식으로 받아오면 됨
+
+        rvTodo=findViewById(R.id.rvTodo);
+
+        SingleAdapter adapter=new SingleAdapter();
+        adapter.addItem(new TodoInput("input"));
+
+        RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this);
+        rvTodo.setLayoutManager(layoutManager);
+        rvTodo.setAdapter(adapter);
     }
 }
