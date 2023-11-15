@@ -258,13 +258,8 @@ public class FragAlarm extends Fragment {
             formattedAlarms.add(formatAlarmTime(alarm));
         }
 
-        // 추가된 부분: 알람 리스트가 갱신되면 SharedPreferences에 저장합니다.
-        saveAlarmsToSharedPreferences();
+        Collections.sort(formattedAlarms); // 시간순으로 정렬된 문자열 리스트
 
-        Collections.sort(alarms); // 시간순으로 정렬
-
-        // 기존의 어댑터를 재사용하는 대신, 새로운 어댑터를 생성하여 설정합니다.
-        // 이렇게 하면 기존의 알람이 삭제될 때 올바르게 갱신됩니다.
         adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, formattedAlarms);
         alarmListView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
@@ -366,6 +361,7 @@ public class FragAlarm extends Fragment {
         int hour = Integer.parseInt(timeComponents[0]);
         int minute = Integer.parseInt(timeComponents[1]);
         String amPm;
+
         if (hour == 0) {
             hour = 12;
             amPm = "오전";
@@ -407,6 +403,10 @@ public class FragAlarm extends Fragment {
 
     private String formatAlarmTime(String alarmTime) {
         // 시간을 오전/오후 시간 형식으로 변환합니다.
+        if (alarmTime.contains("오전") || alarmTime.contains("오후")) {
+            return alarmTime; // 이미 오전/오후가 포함된 문자열이라면 그대로 반환
+        }
+
         String[] timeComponents = alarmTime.split(":");
         int hour = Integer.parseInt(timeComponents[0].replaceAll("[^0-9]", ""));
         int minute = Integer.parseInt(timeComponents[1].replaceAll("[^0-9]", ""));
