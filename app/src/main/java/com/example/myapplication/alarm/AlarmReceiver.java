@@ -1,3 +1,4 @@
+/*
 package com.example.myapplication.alarm;
 
 import android.content.BroadcastReceiver;
@@ -19,3 +20,4 @@ public class AlarmReceiver extends BroadcastReceiver {
         context.startService(serviceIntent);
     }
 }
+ */
