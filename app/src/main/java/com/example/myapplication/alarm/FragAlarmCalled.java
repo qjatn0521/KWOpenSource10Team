@@ -4,19 +4,33 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.myapplication.FragNoti;
 import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
+import com.example.myapplication.sports.adapter.TodaySchedule;
+import com.example.myapplication.sports.database.FixtureDB;
+import com.example.myapplication.sports.database.FixtureDBDao;
+import com.example.myapplication.sports.database.FixtureDatabase;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 public class FragAlarmCalled extends Activity {
-
+    private TodaySchedule adapter =new TodaySchedule();
+    private  RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this);
+    private RecyclerView sportsRv;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +53,9 @@ public class FragAlarmCalled extends Activity {
         alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+alarmTimeMillis, pendingIntent);
 
 
+        //스포츠 일정 불러오기
+        sportsRv = findViewById(R.id.alarm_sports_rv);
+        new QueryDatabaseTask().execute();
 
 
         btnExit.setOnClickListener(new View.OnClickListener() {
@@ -78,5 +95,28 @@ public class FragAlarmCalled extends Activity {
         alarmTimeMillis = calendar.getTimeInMillis() - currentTimeMillis;
 
         return alarmTimeMillis;
+    }
+    private class QueryDatabaseTask extends AsyncTask<Void, Void, List<FixtureDB>> {
+        @Override
+        protected List<FixtureDB> doInBackground(Void... voids) {
+            // 데이터베이스에서 FixtureDB 정보 가져오기
+            FixtureDBDao fixtureDao = FixtureDatabase.getInstance(FragAlarmCalled.this).fixtureDao();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            // 현재 날짜 및 시간을 가져옵니다.
+            String currentTime = dateFormat.format(new Date());
+            return fixtureDao.getEarliestFixtureAndSameDateFixtures(currentTime);
+        }
+
+        @Override
+        protected void onPostExecute(List<FixtureDB> fixtures) {
+            // 데이터베이스 쿼리 결과를 처리하고 UI 업데이트
+            if(fixtures!=null&&!fixtures.isEmpty()) {
+                for(FixtureDB data : fixtures) {
+                    adapter.addItem(data);
+                }
+                sportsRv.setLayoutManager(layoutManager);
+                sportsRv.setAdapter(adapter);
+            }
+        }
     }
 }

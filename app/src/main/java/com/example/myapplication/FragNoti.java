@@ -83,8 +83,6 @@ public class FragNoti extends Fragment {
 
 
         new QueryDatabaseTask().execute();
-        //데이터 베이스 연결
-
         return binding.getRoot();
     }
     private class QueryDatabaseTask extends AsyncTask<Void, Void, List<FixtureDB>> {
@@ -93,19 +91,19 @@ public class FragNoti extends Fragment {
             // 데이터베이스에서 FixtureDB 정보 가져오기
             FixtureDBDao fixtureDao = FixtureDatabase.getInstance(getContext()).fixtureDao();
 
-            return fixtureDao.getEarliestFixtureAndSameDateFixtures(currentTime);
+            return fixtureDao.getFixturesForToday(currentTime);
         }
 
         @Override
         protected void onPostExecute(List<FixtureDB> fixtures) {
             // 데이터베이스 쿼리 결과를 처리하고 UI 업데이트
-            if(fixtures!=null&&!fixtures.isEmpty()) {
+            if(fixtures!=null) {
                 for(FixtureDB data : fixtures) {
                     adapter.addItem(data);
+                    Log.d("data",data.awayTeamName);
                 }
                 String[] todayString = currentTime.split("-");
-                binding.todayTv.setVisibility(View.VISIBLE);
-                binding.todayTv.setText(fixtures.get(0).dateString);
+                binding.todayTv.setText(todayString[1]+"월 "+todayString[2]+"일");
                 rv.setLayoutManager(layoutManager);
                 rv.setAdapter(adapter);
             }

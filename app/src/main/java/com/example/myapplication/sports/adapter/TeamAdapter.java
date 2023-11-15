@@ -107,7 +107,7 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             //규칙2
-            tvTitle=itemView.findViewById(R.id.todo_single);
+            tvTitle=itemView.findViewById(R.id.tv_title);
             imageResource=itemView.findViewById(R.id.iv_img_resource);
             switchButton = itemView.findViewById(R.id.switch1);
         }
@@ -284,5 +284,3 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
 
     }
 }
-
-
