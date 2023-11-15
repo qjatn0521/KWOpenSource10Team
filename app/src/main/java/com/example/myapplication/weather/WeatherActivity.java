@@ -70,12 +70,10 @@ public class WeatherActivity extends AppCompatActivity {
                                     temperature.setText(uob.get(i) + "°C");
                                 }
                             }
-
                             for(int i = 0; i < 112; i++){
                                 if (vcg.get(i).equals("TMP")) {
                                     highTemp.setText(vfv.get(i) + "°C");
                                 }
-
                             }
                         }
                     });

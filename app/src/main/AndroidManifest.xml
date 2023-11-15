@@ -9,7 +9,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
@@ -37,10 +36,9 @@
         <activity android:name=".weather.WeatherActivity"/>
         <activity android:name=".sports.SportsActivity"/>
         <activity android:name=".todo.TodoActivity"/>
-        <receiver android:name=".sports.noti.NotificationReceiver"/>
         <activity android:name=".alarm.FragAlarm"/>
         <activity android:name=".alarm.FragAlarmCalled"/>
-        <receiver android:name=".alarm.AlarmReceiver">
+        <receiver android:name=".alarm.AlarmReceiver"/>
         <receiver android:name=".sports.noti.NotificationReceiver"
             android:enabled="true"
             android:exported="false">

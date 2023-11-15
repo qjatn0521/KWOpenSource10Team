@@ -213,8 +213,8 @@ public class FragAlarm extends Fragment {
 
         Intent receiverIntent = new Intent(getContext(), AlarmReceiver.class);
         receiverIntent.putExtra("id", a.getAlarmId());
-        receiverIntent.putExtra("id", a.getAlarmId());
-        Log.d("add ID", a.getAlarmId()+"");
+        receiverIntent.putExtra("time", alarmTime);
+        //Log.d("add ID", a.getAlarmId()+"");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), a.getAlarmId(), receiverIntent, PendingIntent.FLAG_IMMUTABLE);
 
         alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+alarmTimeMillis, pendingIntent);
@@ -233,6 +233,12 @@ public class FragAlarm extends Fragment {
     private void deleteAlarm(Alarm selectedalarm) {
         if (alarms.contains(selectedalarm)) {
             alarms.remove(selectedalarm);
+            Intent alarmIntent = new Intent(requireContext(), FragAlarmCalled.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(requireContext(), selectedalarm.getAlarmId(), alarmIntent, PendingIntent.FLAG_IMMUTABLE);
+
+            alarmManager.cancel(pendingIntent);
+
+            pendingIntent.cancel();
             updateAlarmList();
         }
     }
