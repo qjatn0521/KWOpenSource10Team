@@ -8,10 +8,9 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <ListView
-        android:id="@+id/list_view"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvTodo"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
-
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"/>
 </LinearLayout>
