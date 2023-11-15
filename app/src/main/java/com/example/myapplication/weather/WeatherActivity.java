@@ -1,47 +1,97 @@
 package com.example.myapplication.weather;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.example.myapplication.R;
 import com.example.myapplication.weather.api.UltraSrtNcstAPI;
 import com.example.myapplication.weather.api.VillageFcstAPI;
-import com.example.myapplication.weather.location.GPSLocation;
+import com.example.myapplication.weather.time.CurrentTime;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class WeatherActivity extends AppCompatActivity {
-    private GPSLocation location;
-    private static final int MIN_TIME_BW_UPDATES = 1000; // 1초마다
-    private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 10.0f; // 10 미터마다
+    String date = "20231114";
 
     private LocationManager locationManager;
     private LocationListener locationListener;
+    private CurrentTime currentTime;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.frag_weather);
 
-        UltraSrtNcstAPI ulweather = new UltraSrtNcstAPI("20231115", "0000", "55", "127");
-        VillageFcstAPI viweather = new VillageFcstAPI("20231114", "2300", "55", "127");
+        currentTime = new CurrentTime();
+        //System.out.println("currentTime.getBaseUlTime() = " + currentTime.getBaseViTime());
+        //System.out.println("currentTime.getBaseUlDate() = " + currentTime.getBaseViDate());
 
+        UltraSrtNcstAPI ulweather = new UltraSrtNcstAPI(currentTime.getBaseUlDate(), currentTime.getBaseUlTime(), "55", "127");
+        VillageFcstAPI viweather = new VillageFcstAPI(currentTime.getBaseViDate(), currentTime.getBaseViTime(), "55", "127");
+
+        TextView localArea = findViewById(R.id.localArea);
         TextView temperature = findViewById(R.id.temperature);
         TextView highTemp = findViewById(R.id.HighTemp);
+        TextView lowTemp = findViewById(R.id.LowTemp);
+        TextView sky = findViewById(R.id.Sky);
 
+        localArea.setText("서울 특별시");
         /** 현재 위치를 받아오는 코드 */
-        location = new GPSLocation(WeatherActivity.this);
+        final LocationListener gpsLocationListener = new LocationListener() {
+            public void onLocationChanged(Location location) {
+                String provider = location.getProvider();  // 위치정보
+                double longitude = location.getLongitude(); // 위도
+                double latitude = location.getLatitude(); // 경도
+                double altitude = location.getAltitude(); // 고도
+                System.out.println("latitude = " + latitude);
+                System.out.println("longitude = " + longitude);
 
-        double latitude = location.getLatitude();
-        double longitude = location.getLongitude();
+                localArea.setText(Double.toString(longitude));
+            }
+        };
 
-        System.out.println("latitude = " + latitude);
-        System.out.println("longitude = " + longitude);
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= 23 &&
+                ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(WeatherActivity.this, new String[]{
+                    android.Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+        } else {
+            // 가장최근 위치정보 가져오기
+            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (location != null) {
+                String provider = location.getProvider();
+                double longitude = location.getLongitude();
+                double latitude = location.getLatitude();
+                double altitude = location.getAltitude();
+
+                System.out.println("latitude = " + latitude);
+                System.out.println("longitude = " + longitude);
+            }
+
+            // 위치정보를 원하는 시간, 거리마다 갱신해준다.
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                    1000,
+                    1,
+                    gpsLocationListener);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+                    1000,
+                    1,
+                    gpsLocationListener);
+        }
 
         /** API를 받아오는 Thread */
         new Thread(new Runnable() {
@@ -65,25 +115,103 @@ public class WeatherActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            for(int i = 0; i < ucg.size(); i++){
-                                if (ucg.get(i).equals("T1H")){
-                                    temperature.setText(uob.get(i) + "°C");
+                            // 초단기실황 데이터
+                            String T1H, RN1, REH, PTY, VEC, WSD;
+                            List<Integer> TmpList = new ArrayList<>();
+
+                            for (int i = 0; i < ucg.size(); i++) {
+                                // 초단기실황에서 기온
+                                if (ucg.get(i).equals("T1H")) {
+                                    T1H = uob.get(i);
+                                    temperature.setText(T1H + "°C");
+                                }
+
+                                // 초단기실황에서 습도
+                                if (ucg.get(i).equals("REH")) {
+                                    RN1 = uob.get(i);
+                                }
+
+                                // 초단기실황에서 강수형태
+                                if (ucg.get(i).equals("PTY")) {
+                                    PTY = uob.get(i);
+
+                                    String str = "null"; // 강수 설명 String
+                                    switch (PTY) {
+                                        case "0":
+                                            str = "강우 없음";
+                                            break;
+                                        case "1":
+                                            str = "비";
+                                            break;
+                                        case "2":
+                                            str = "비/눈";
+                                            break;
+                                        case "3":
+                                            str = "눈";
+                                            break;
+                                        case "4":
+                                            str = "빗방울";
+                                            break;
+                                        case "5":
+                                            str = "빗방울눈날림";
+                                            break;
+                                        case "6":
+                                            str = "눈날림";
+                                            break;
+                                        }
+
+                                        lowTemp.setText(str);
+                                }
+
+                                    // 풍향
+                                    if (ucg.get(i).equals("VEC")) {
+                                        VEC = uob.get(i);
+                                    }
+
+                                    // 풍속
+                                    if (ucg.get(i).equals("WSD")) {
+                                        WSD = uob.get(i);
+                                    }
+                                }
+
+                                int skyCnt = 0;
+                                for (int i = 0; i < vcg.size(); i++) {
+                                    // 1시간별 기온 찾기
+                                    if (vcg.get(i).equals("TMP") && vbd.get(i).equals(currentTime.getBaseViDate())) {
+                                        TmpList.add(Integer.parseInt(vfv.get(i)));
+                                    }
+                                    if (vcg.get(i).equals("SKY") && skyCnt == 0) {
+                                        skyCnt++;
+                                        switch (vfv.get(i)) {
+                                            case "1":
+                                                sky.setText("맑음");
+                                                break;
+                                            case "3":
+                                                sky.setText("구름많음");
+                                                break;
+                                            case "4":
+                                                sky.setText("흐림");
+                                                break;
+                                        }
+
+                                    }
+                                }
+
+                                if (!TmpList.isEmpty()) {
+                                    int max = Collections.max(TmpList);
+                                    int min = Collections.min(TmpList);
+                                    highTemp.setText(max + "℃");
+                                    lowTemp.setText(min + "℃");
                                 }
                             }
-
-                            for(int i = 0; i < 112; i++){
-                                if (vcg.get(i).equals("TMP")) {
-                                    highTemp.setText(vfv.get(i) + "°C");
-                                }
-
-                            }
-                        }
-                    });
-                } catch (Exception e) {
-                    System.out.println("onCreateThread = " + e);
+                        });
+                    } catch (Exception e) {
+                        System.out.println("onCreateThread = " + e);
+                    }
                 }
-            }
-        }).start();
+            }).start();
     }
 }
+
+
 

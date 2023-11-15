@@ -46,6 +46,8 @@ public class FragNoti extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragNotiBinding.inflate((getLayoutInflater()));
+
+
         rv = binding.recyclerView;
         binding.btnSettingSports.setOnClickListener(new View.OnClickListener() {
             @Override

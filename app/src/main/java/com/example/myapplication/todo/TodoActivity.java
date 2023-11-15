@@ -14,5 +14,4 @@ public class TodoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_todo);
         //TextView tv1 = findViewById(R.id.textView); 이런식으로 받아오면 됨
     }
-
 }
