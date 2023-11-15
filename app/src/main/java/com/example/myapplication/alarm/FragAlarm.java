@@ -104,8 +104,7 @@ public class FragAlarm extends Fragment {
                 public void onCompletion(MediaPlayer mp) {
                     mediaPlayer.release(); // MediaPlayer 해제
                     mediaPlayer = null;
-                    //markAlarmAsRang(alarmTime);
-                    //updateAlarmList(); // 알람 리스트 갱신
+
                 }
             });
         }
@@ -389,17 +388,6 @@ public class FragAlarm extends Fragment {
         return false;
     }
 
-   /* private void markAlarmAsRang(String alarmTime) {
-        int index = alarms.indexOf(alarmTime);
-        if (index != -1) {
-            String markedAlarm = alarms.get(index);
-            if (!markedAlarm.contains("알람 ON")) {
-                markedAlarm = markedAlarm + " - 알람 ON.";
-                alarms.set(index, markedAlarm);
-                updateAlarmList();
-            }
-        }
-    }*/
 
     private String formatAlarmTime(String alarmTime) {
         // 시간을 오전/오후 시간 형식으로 변환합니다.
@@ -427,15 +415,5 @@ public class FragAlarm extends Fragment {
         return formattedTime;
     }
 
-    /*private void removeRingingText() {
-        for (int i = 0; i < alarms.size(); i++) {
-            if (alarms.get(i).contains("알람이 울렸습니다.")) {
-                String unmarkedAlarm = alarms.get(i).replace(" - 알람이 울렸습니다.", "");
-                alarms.set(i, unmarkedAlarm);
-                updateAlarmList();
-                break;
-            }
-        }
-
-    }*/
+    
 }
