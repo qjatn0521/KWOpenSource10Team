@@ -10,6 +10,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -29,8 +30,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class WeatherActivity extends AppCompatActivity {
-    String date = "20231114";
-
     private LocationManager locationManager;
     private LocationListener locationListener;
     private CurrentTime currentTime;
@@ -51,6 +50,33 @@ public class WeatherActivity extends AppCompatActivity {
         TextView highTemp = findViewById(R.id.HighTemp);
         TextView lowTemp = findViewById(R.id.LowTemp);
         TextView sky = findViewById(R.id.Sky);
+        ImageView image = findViewById(R.id.weatherImage);
+
+        TextView fcstTime0 = findViewById(R.id.fsctTime0);
+        TextView fcstTime1 = findViewById(R.id.fsctTime1);
+        TextView fcstTime2 = findViewById(R.id.fsctTime2);
+        TextView fcstTime3 = findViewById(R.id.fsctTime3);
+        TextView fcstTime4 = findViewById(R.id.fsctTime4);
+        TextView tempText0 = findViewById(R.id.tempText0);
+        TextView tempText1 = findViewById(R.id.tempText1);
+        TextView tempText2 = findViewById(R.id.tempText2);
+        TextView tempText3 = findViewById(R.id.tempText3);
+        TextView tempText4 = findViewById(R.id.tempText4);
+        TextView REHText0 = findViewById(R.id.REHText0);
+        TextView REHText1 = findViewById(R.id.REHText1);
+        TextView REHText2 = findViewById(R.id.REHText2);
+        TextView REHText3 = findViewById(R.id.REHText3);
+        TextView REHText4 = findViewById(R.id.REHText4);
+        TextView WSDText0 = findViewById(R.id.WSDText0);
+        TextView WSDText1 = findViewById(R.id.WSDText1);
+        TextView WSDText2 = findViewById(R.id.WSDText2);
+        TextView WSDText3 = findViewById(R.id.WSDText3);
+        TextView WSDText4 = findViewById(R.id.WSDText4);
+        ImageView weatherImage0 = findViewById(R.id.weatherImage0);
+        ImageView weatherImage1 = findViewById(R.id.weatherImage1);
+        ImageView weatherImage2 = findViewById(R.id.weatherImage2);
+        ImageView weatherImage3 = findViewById(R.id.weatherImage3);
+        ImageView weatherImage4 = findViewById(R.id.weatherImage4);
 
         localArea.setText("서울 특별시");
         /** 현재 위치를 받아오는 코드 */
@@ -58,8 +84,6 @@ public class WeatherActivity extends AppCompatActivity {
             public void onLocationChanged(Location location) {
                 double longitude = location.getLongitude(); // 위도
                 double latitude = location.getLatitude(); // 경도
-
-                localArea.setText(Double.toString(longitude));
             }
         };
 
@@ -134,11 +158,6 @@ public class WeatherActivity extends AppCompatActivity {
                                     temperature.setText(T1H + "°C");
                                 }
 
-                                // 초단기실황에서 습도
-                                if (ucg.get(i).equals("REH")) {
-                                    RN1 = uob.get(i);
-                                }
-
                                 // 초단기실황에서 강수형태
                                 if (ucg.get(i).equals("PTY")) {
                                     PTY = uob.get(i);
@@ -169,20 +188,10 @@ public class WeatherActivity extends AppCompatActivity {
                                         }
 
                                         // lowTemp.setText(str);
-                                }
-
-                                    // 풍향
-                                    if (ucg.get(i).equals("VEC")) {
-                                        VEC = uob.get(i);
-                                    }
-
-                                    // 풍속
-                                    if (ucg.get(i).equals("WSD")) {
-                                        WSD = uob.get(i);
                                     }
                                 }
 
-                                int skyCnt = 0, tmpCnt = 0;
+                                int skyCnt = 0, tmpCnt = 0, layCnt = 0, cnt = 0, rainCnt = 0;
                                 for (int i = 0; i < vcg.size(); i++) {
                                     // 1시간별 기온 찾기
                                     if (vcg.get(i).equals("TMP") && tmpCnt != 24) {
@@ -195,15 +204,277 @@ public class WeatherActivity extends AppCompatActivity {
                                         switch (vfv.get(i)) {
                                             case "1":
                                                 sky.setText("맑음");
+                                                image.setImageResource(R.drawable.weather_sunny);
                                                 break;
                                             case "3":
                                                 sky.setText("구름많음");
+                                                image.setImageResource(R.drawable.weather_cloudy);
                                                 break;
                                             case "4":
                                                 sky.setText("흐림");
+                                                image.setImageResource(R.drawable.weather_cloudy);
                                                 break;
                                         }
+                                    }
+                                    if (vcg.get(i).equals("PTY") && rainCnt == 0) {
+                                        rainCnt++;
+                                        switch (vfv.get(i)) {
+                                            case "0": break;
+                                            case "1":
+                                                sky.setText("비");
+                                                image.setImageResource(R.drawable.weather_rain);
+                                                break;
+                                            case "2":
+                                                sky.setText("비/눈");
+                                                image.setImageResource(R.drawable.weather_rain);
+                                                break;
+                                            case "3":
+                                                sky.setText("눈");
+                                                image.setImageResource(R.drawable.weather_snow);
+                                                break;
+                                            case "4":
+                                                sky.setText("소나기");
+                                                image.setImageResource(R.drawable.weather_rain);
+                                                break;
+                                        }
+                                    }
 
+                                    cnt++;
+                                    if (cnt == 12){
+                                        cnt = 0;
+                                        layCnt++;
+                                    }
+
+                                    if (layCnt == 1){
+                                        String str = vft.get(i).substring(0, 2);
+                                        str += "시";
+                                        fcstTime0.setText(str);
+
+                                        if (vcg.get(i).equals("TMP")){
+                                            tempText0.setText(vfv.get(i) + "℃");
+                                        }
+
+                                        if (vcg.get(i).equals("SKY")) {
+                                            switch (vfv.get(i)) {
+                                                case "1":
+                                                    weatherImage0.setImageResource(R.drawable.weather_sunny_icon);
+                                                    break;
+                                                case "3":
+                                                    weatherImage0.setImageResource(R.drawable.weather_cloudy_icon);
+                                                    break;
+                                                case "4":
+                                                    weatherImage0.setImageResource(R.drawable.weather_cloudy_icon);
+                                                    break;
+                                            }
+                                        }
+                                        if (vcg.get(i).equals("PTY")) {
+                                            switch (vfv.get(i)) {
+                                                case "0": break;
+                                                case "1":
+                                                    weatherImage0.setImageResource(R.drawable.weather_rain_icon);
+                                                    break;
+                                                case "2":
+                                                    weatherImage0.setImageResource(R.drawable.weather_rain_icon);
+                                                    break;
+                                                case "3":
+                                                    weatherImage0.setImageResource(R.drawable.weather_snow_icon);
+                                                    break;
+                                                case "4":
+                                                    weatherImage0.setImageResource(R.drawable.weather_rain_icon);
+                                                    break;
+                                            }
+                                        }
+
+                                        if (vcg.get(i).equals("REH")){
+                                            REHText0.setText(vfv.get(i) + "%");
+                                        }
+                                        if (vcg.get(i).equals("WSD")){
+                                            WSDText0.setText(vfv.get(i) + "m/s");
+                                        }
+                                    }
+                                    else if (layCnt == 2){
+                                        String str = vft.get(i).substring(0, 2);
+                                        str += "시";
+                                        fcstTime1.setText(str);
+
+                                        if (vcg.get(i).equals("TMP")){
+                                            tempText1.setText(vfv.get(i) + "℃");
+                                        }
+                                        if (vcg.get(i).equals("REH")){
+                                            REHText1.setText(vfv.get(i) + "%");
+                                        }
+                                        if (vcg.get(i).equals("WSD")){
+                                            WSDText1.setText(vfv.get(i) + "m/s");
+                                        }
+
+                                        if (vcg.get(i).equals("SKY")) {
+                                            switch (vfv.get(i)) {
+                                                case "1":
+                                                    weatherImage1.setImageResource(R.drawable.weather_sunny_icon);
+                                                    break;
+                                                case "3":
+                                                    weatherImage1.setImageResource(R.drawable.weather_cloudy_icon);
+                                                    break;
+                                                case "4":
+                                                    weatherImage1.setImageResource(R.drawable.weather_cloudy_icon);
+                                                    break;
+                                            }
+                                        }
+                                        if (vcg.get(i).equals("PTY")) {
+                                            switch (vfv.get(i)) {
+                                                case "0": break;
+                                                case "1":
+                                                    weatherImage1.setImageResource(R.drawable.weather_rain_icon);
+                                                    break;
+                                                case "2":
+                                                    weatherImage1.setImageResource(R.drawable.weather_rain_icon);
+                                                    break;
+                                                case "3":
+                                                    weatherImage1.setImageResource(R.drawable.weather_snow_icon);
+                                                    break;
+                                                case "4":
+                                                    weatherImage1.setImageResource(R.drawable.weather_rain_icon);
+                                                    break;
+                                            }
+                                        }
+                                    }
+                                    else if (layCnt == 3){
+                                        String str = vft.get(i).substring(0, 2);
+                                        str += "시";
+                                        fcstTime2.setText(str);
+
+                                        if (vcg.get(i).equals("TMP")){
+                                            tempText2.setText(vfv.get(i) + "℃");
+                                        }
+                                        if (vcg.get(i).equals("REH")){
+                                            REHText2.setText(vfv.get(i) + "%");
+                                        }
+                                        if (vcg.get(i).equals("WSD")){
+                                            WSDText2.setText(vfv.get(i) + "m/s");
+                                        }
+
+                                        if (vcg.get(i).equals("SKY")) {
+                                            switch (vfv.get(i)) {
+                                                case "1":
+                                                    weatherImage2.setImageResource(R.drawable.weather_sunny_icon);
+                                                    break;
+                                                case "3":
+                                                    weatherImage2.setImageResource(R.drawable.weather_cloudy_icon);
+                                                    break;
+                                                case "4":
+                                                    weatherImage2.setImageResource(R.drawable.weather_cloudy_icon);
+                                                    break;
+                                            }
+                                        }
+                                        if (vcg.get(i).equals("PTY")) {
+                                            switch (vfv.get(i)) {
+                                                case "0": break;
+                                                case "1":
+                                                    weatherImage2.setImageResource(R.drawable.weather_rain_icon);
+                                                    break;
+                                                case "2":
+                                                    weatherImage2.setImageResource(R.drawable.weather_rain_icon);
+                                                    break;
+                                                case "3":
+                                                    weatherImage2.setImageResource(R.drawable.weather_snow_icon);
+                                                    break;
+                                                case "4":
+                                                    weatherImage2.setImageResource(R.drawable.weather_rain_icon);
+                                                    break;
+                                            }
+                                        }
+                                    }
+                                    else if (layCnt == 4){
+                                        String str = vft.get(i).substring(0, 2);
+                                        str += "시";
+                                        fcstTime3.setText(str);
+
+                                        if (vcg.get(i).equals("TMP")){
+                                            tempText3.setText(vfv.get(i) + "℃");
+                                        }
+                                        if (vcg.get(i).equals("REH")){
+                                            REHText3.setText(vfv.get(i) + "%");
+                                        }
+                                        if (vcg.get(i).equals("WSD")){
+                                            WSDText3.setText(vfv.get(i) + "m/s");
+                                        }
+
+                                        if (vcg.get(i).equals("SKY")) {
+                                            switch (vfv.get(i)) {
+                                                case "1":
+                                                    weatherImage3.setImageResource(R.drawable.weather_sunny_icon);
+                                                    break;
+                                                case "3":
+                                                    weatherImage3.setImageResource(R.drawable.weather_cloudy_icon);
+                                                    break;
+                                                case "4":
+                                                    weatherImage3.setImageResource(R.drawable.weather_cloudy_icon);
+                                                    break;
+                                            }
+                                        }
+                                        if (vcg.get(i).equals("PTY")) {
+                                            switch (vfv.get(i)) {
+                                                case "0": break;
+                                                case "1":
+                                                    weatherImage3.setImageResource(R.drawable.weather_rain_icon);
+                                                    break;
+                                                case "2":
+                                                    weatherImage3.setImageResource(R.drawable.weather_rain_icon);
+                                                    break;
+                                                case "3":
+                                                    weatherImage3.setImageResource(R.drawable.weather_snow_icon);
+                                                    break;
+                                                case "4":
+                                                    weatherImage3.setImageResource(R.drawable.weather_rain_icon);
+                                                    break;
+                                            }
+                                        }
+                                    }
+                                    else if (layCnt == 5){
+                                        String str = vft.get(i).substring(0, 2);
+                                        str += "시";
+                                        fcstTime4.setText(str);
+
+                                        if (vcg.get(i).equals("TMP")){
+                                            tempText4.setText(vfv.get(i) + "℃");
+                                        }
+                                        if (vcg.get(i).equals("REH")){
+                                            REHText4.setText(vfv.get(i) + "%");
+                                        }
+                                        if (vcg.get(i).equals("WSD")){
+                                            WSDText4.setText(vfv.get(i) + "m/s");
+                                        }
+
+                                        if (vcg.get(i).equals("SKY")) {
+                                            switch (vfv.get(i)) {
+                                                case "1":
+                                                    weatherImage4.setImageResource(R.drawable.weather_sunny_icon);
+                                                    break;
+                                                case "3":
+                                                    weatherImage4.setImageResource(R.drawable.weather_cloudy_icon);
+                                                    break;
+                                                case "4":
+                                                    weatherImage4.setImageResource(R.drawable.weather_cloudy_icon);
+                                                    break;
+                                            }
+                                        }
+                                        if (vcg.get(i).equals("PTY")) {
+                                            switch (vfv.get(i)) {
+                                                case "0": break;
+                                                case "1":
+                                                    weatherImage4.setImageResource(R.drawable.weather_rain_icon);
+                                                    break;
+                                                case "2":
+                                                    weatherImage4.setImageResource(R.drawable.weather_rain_icon);
+                                                    break;
+                                                case "3":
+                                                    weatherImage4.setImageResource(R.drawable.weather_snow_icon);
+                                                    break;
+                                                case "4":
+                                                    weatherImage4.setImageResource(R.drawable.weather_rain_icon);
+                                                    break;
+                                            }
+                                        }
                                     }
                                 }
 

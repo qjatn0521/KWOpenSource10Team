@@ -57,7 +57,7 @@ public class CurrentTime {
             baseViTime = "2000";
         } else if (hour >= 23 && hour < 24) {
             baseViTime = "2300";
-        } else if (hour > 0 && hour < 2) {
+        } else if (hour >= 0 && hour < 2) {
             baseViTime = "2300";
             baseViDate = LocalDate.now().minusDays(1).format(dateFormatter);
         }
