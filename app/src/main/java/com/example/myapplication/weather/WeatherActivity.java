@@ -1,5 +1,7 @@
 package com.example.myapplication.weather;
 
+import static com.example.myapplication.weather.position.TransCoordinate.TO_GRID;
+
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -7,6 +9,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -17,6 +20,8 @@ import androidx.core.content.ContextCompat;
 import com.example.myapplication.R;
 import com.example.myapplication.weather.api.UltraSrtNcstAPI;
 import com.example.myapplication.weather.api.VillageFcstAPI;
+import com.example.myapplication.weather.position.LatXLngY;
+import com.example.myapplication.weather.position.TransCoordinate;
 import com.example.myapplication.weather.time.CurrentTime;
 
 import java.util.ArrayList;
@@ -29,6 +34,10 @@ public class WeatherActivity extends AppCompatActivity {
     private LocationManager locationManager;
     private LocationListener locationListener;
     private CurrentTime currentTime;
+    private TransCoordinate trans;
+    double longitude;
+    double latitude;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -36,11 +45,6 @@ public class WeatherActivity extends AppCompatActivity {
         setContentView(R.layout.frag_weather);
 
         currentTime = new CurrentTime();
-        //System.out.println("currentTime.getBaseUlTime() = " + currentTime.getBaseViTime());
-        //System.out.println("currentTime.getBaseUlDate() = " + currentTime.getBaseViDate());
-
-        UltraSrtNcstAPI ulweather = new UltraSrtNcstAPI(currentTime.getBaseUlDate(), currentTime.getBaseUlTime(), "55", "127");
-        VillageFcstAPI viweather = new VillageFcstAPI(currentTime.getBaseViDate(), currentTime.getBaseViTime(), "55", "127");
 
         TextView localArea = findViewById(R.id.localArea);
         TextView temperature = findViewById(R.id.temperature);
@@ -52,12 +56,8 @@ public class WeatherActivity extends AppCompatActivity {
         /** 현재 위치를 받아오는 코드 */
         final LocationListener gpsLocationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
-                String provider = location.getProvider();  // 위치정보
                 double longitude = location.getLongitude(); // 위도
                 double latitude = location.getLatitude(); // 경도
-                double altitude = location.getAltitude(); // 고도
-                System.out.println("latitude = " + latitude);
-                System.out.println("longitude = " + longitude);
 
                 localArea.setText(Double.toString(longitude));
             }
@@ -73,13 +73,11 @@ public class WeatherActivity extends AppCompatActivity {
             // 가장최근 위치정보 가져오기
             Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if (location != null) {
-                String provider = location.getProvider();
-                double longitude = location.getLongitude();
-                double latitude = location.getLatitude();
-                double altitude = location.getAltitude();
+                longitude = location.getLongitude();
+                latitude = location.getLatitude();
 
-                System.out.println("latitude = " + latitude);
-                System.out.println("longitude = " + longitude);
+                System.out.println("latitude! = " + latitude);
+                System.out.println("longitude! = " + longitude);
             }
 
             // 위치정보를 원하는 시간, 거리마다 갱신해준다.
@@ -92,6 +90,16 @@ public class WeatherActivity extends AppCompatActivity {
                     1,
                     gpsLocationListener);
         }
+
+        trans = new TransCoordinate();
+        LatXLngY tmp = trans.convertGRID_GPS(TO_GRID, latitude, longitude);
+        Log.e(">>", "x = " + tmp.x + ", y = " + tmp.y);
+        String nx = String.format("%.0f", tmp.x);
+        String ny = String.format("%.0f", tmp.y);
+
+        UltraSrtNcstAPI ulweather = new UltraSrtNcstAPI(currentTime.getBaseUlDate(), currentTime.getBaseUlTime(), nx, ny);
+        VillageFcstAPI viweather = new VillageFcstAPI(currentTime.getBaseViDate(), currentTime.getBaseViTime(), nx, ny);
+        Log.e(">>", "x = " + nx + ", y = " + ny);
 
         /** API를 받아오는 Thread */
         new Thread(new Runnable() {
@@ -160,7 +168,7 @@ public class WeatherActivity extends AppCompatActivity {
                                             break;
                                         }
 
-                                        lowTemp.setText(str);
+                                        // lowTemp.setText(str);
                                 }
 
                                     // 풍향
@@ -174,11 +182,13 @@ public class WeatherActivity extends AppCompatActivity {
                                     }
                                 }
 
-                                int skyCnt = 0;
+                                int skyCnt = 0, tmpCnt = 0;
                                 for (int i = 0; i < vcg.size(); i++) {
                                     // 1시간별 기온 찾기
-                                    if (vcg.get(i).equals("TMP") && vbd.get(i).equals(currentTime.getBaseViDate())) {
+                                    if (vcg.get(i).equals("TMP") && tmpCnt != 24) {
                                         TmpList.add(Integer.parseInt(vfv.get(i)));
+                                        Log.e("addTemp", vfv.get(i));
+                                        tmpCnt++;
                                     }
                                     if (vcg.get(i).equals("SKY") && skyCnt == 0) {
                                         skyCnt++;
