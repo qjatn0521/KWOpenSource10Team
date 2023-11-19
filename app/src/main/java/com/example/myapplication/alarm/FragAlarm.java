@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -58,8 +59,8 @@ import androidx.core.app.NotificationManagerCompat;
 public class FragAlarm extends Fragment {
 
     private ListView alarmListView;
-    private Button addAlarmButton;
-    private Button deleteAlarmButton;
+    private TextView addAlarmButton;
+    private TextView deleteAlarmButton;
     private Button stopAlarmButton;
     private List<Alarm> alarms= new ArrayList<>();;
     private AlarmManager alarmManager;
@@ -136,7 +137,19 @@ public class FragAlarm extends Fragment {
         calendar.set(Calendar.HOUR_OF_DAY, alarmHour);
         calendar.set(Calendar.MINUTE, alarmMinute);
         calendar.set(Calendar.SECOND, 0);
-        alarmTimeMillis = calendar.getTimeInMillis() - currentTimeMillis;
+        alarmTimeMillis = calendar.getTimeInMillis();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1; // 월은 0부터 시작하므로 1을 더해줌
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+        int second = calendar.get(Calendar.SECOND);
+        int millisecond = calendar.get(Calendar.MILLISECOND);
+
+        // Log에 한 줄에 출력
+        String logMessage = String.format("Time: %04d-%02d-%02d %02d:%02d:%02d.%03d",
+                year, month, day, hour, minute, second, millisecond);
+        Log.d("CalendarLogExample22", logMessage);
 
         return alarmTimeMillis;
     }
@@ -151,6 +164,11 @@ public class FragAlarm extends Fragment {
                 startActivity(intent);
             }
         }
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        saveAlarmsToSharedPreferences();
     }
 
     @Override
@@ -213,7 +231,7 @@ public class FragAlarm extends Fragment {
         //Log.d("add ID", a.getAlarmId()+"");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), a.getAlarmId(), receiverIntent, PendingIntent.FLAG_IMMUTABLE);
 
-        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+alarmTimeMillis, pendingIntent);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTimeMillis, pendingIntent);
     }
 
     private void checkAlarms() {
@@ -265,7 +283,7 @@ public class FragAlarm extends Fragment {
 
         Collections.sort(formattedAlarms); // 시간순으로 정렬된 문자열 리스트
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, formattedAlarms);
+        AlarmAdapter adapter = new AlarmAdapter(requireContext(), formattedAlarms);
         alarmListView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
 
@@ -360,7 +378,7 @@ public class FragAlarm extends Fragment {
         if(a!=null)
             alarms.addAll(a); // 정렬된 알람 리스트를 추가
         updateAlarmList();
-        checkAlarms();
+        //checkAlarms();
     }
     private String formatAlarmTimeForLoad(String alarmTime) {
         // 24시간 형식의 시간을 12시간 형식으로 변환합니다.

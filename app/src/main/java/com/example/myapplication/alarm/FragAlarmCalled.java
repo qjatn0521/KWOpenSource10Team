@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,10 +24,12 @@ import com.example.myapplication.sports.database.FixtureDB;
 import com.example.myapplication.sports.database.FixtureDBDao;
 import com.example.myapplication.sports.database.FixtureDatabase;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class FragAlarmCalled extends Activity {
     private TodaySchedule adapter =new TodaySchedule();
@@ -54,7 +57,11 @@ public class FragAlarmCalled extends Activity {
         long alarmTimeMillis = calculateAlarmTime(timeValue);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id, receiverIntent, PendingIntent.FLAG_IMMUTABLE);
         AlarmManager alarmManager= (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+alarmTimeMillis, pendingIntent);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTimeMillis, pendingIntent);
+
+        //시간 설정
+        TextView timeTv = findViewById(R.id.alarm_time_tv);
+        timeTv.setText(convert24HourTo12Hour(timeValue));
 
 
         //스포츠 일정 불러오기
@@ -89,7 +96,6 @@ public class FragAlarmCalled extends Activity {
         }
 
         // 알람 시간을 밀리초로 변환
-        long currentTimeMillis = System.currentTimeMillis();
         long alarmTimeMillis = 0;
         if (alarmHour < currentHour || (alarmHour == currentHour && alarmMinute <= currentMinute)) {
             // 알람 시간이 현재 시간보다 이전이라면 다음날로 설정
@@ -98,10 +104,27 @@ public class FragAlarmCalled extends Activity {
         calendar.set(Calendar.HOUR_OF_DAY, alarmHour);
         calendar.set(Calendar.MINUTE, alarmMinute);
         calendar.set(Calendar.SECOND, 0);
-        alarmTimeMillis = calendar.getTimeInMillis() - currentTimeMillis;
+        calendar.set(Calendar.MILLISECOND, 0);
+        alarmTimeMillis = calendar.getTimeInMillis();
 
         return alarmTimeMillis;
     }
+    public static String convert24HourTo12Hour(String inputTime) {
+        SimpleDateFormat inputFormat = new SimpleDateFormat("HH:mm",new Locale("ko", "KR"));
+        SimpleDateFormat outputFormat = new SimpleDateFormat("a h:mm", new Locale("ko", "KR"));
+
+        try {
+            Date date = inputFormat.parse(inputTime);
+            if (date != null) {
+                return outputFormat.format(date).replaceAll("AM","오전").replaceAll("PM","오후");
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return ""; // 변환 실패 시 빈 문자열 반환 또는 예외 처리
+    }
+
     private class QueryDatabaseTask extends AsyncTask<Void, Void, List<FixtureDB>> {
         @Override
         protected List<FixtureDB> doInBackground(Void... voids) {
@@ -110,7 +133,7 @@ public class FragAlarmCalled extends Activity {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             // 현재 날짜 및 시간을 가져옵니다.
             String currentTime = dateFormat.format(new Date());
-            return fixtureDao.getEarliestFixtureAndSameDateFixtures(currentTime);
+            return fixtureDao.getFixturesForToday(currentTime);
         }
 
         @Override
