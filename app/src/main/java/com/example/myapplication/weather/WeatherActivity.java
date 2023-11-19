@@ -125,9 +125,10 @@ public class WeatherActivity extends AppCompatActivity {
         Log.e("WeatherActivityParameter", "getBaseViDate = " + currentTime.getBaseViDate() + ", getBaseViTime = " + currentTime.getBaseViTime());
         Log.e("WeatherActivityParameter", "nx = " + nx + ", ny = " + ny);
 
-        UltraSrtNcstAPI ulweather = new UltraSrtNcstAPI(currentTime.getBaseUlDate(), currentTime.getBaseUlTime(), nx, ny);
-        VillageFcstAPI viweather = new VillageFcstAPI(currentTime.getBaseViDate(), currentTime.getBaseViTime(), nx, ny);
+        UltraSrtNcstAPI ulweather = new UltraSrtNcstAPI(currentTime.getBaseUlDate(), currentTime.getBaseUlTime(), "61", "128");
+        VillageFcstAPI viweather = new VillageFcstAPI(currentTime.getBaseViDate(), currentTime.getBaseViTime(), "61", "128");
         Log.e(">>", "x = " + nx + ", y = " + ny);
+        localArea.setText(String.format("%.1f", latitude) + ", " + String.format("%.1f", longitude));
 
         /** API를 받아오는 Thread */
         new Thread(new Runnable() {
