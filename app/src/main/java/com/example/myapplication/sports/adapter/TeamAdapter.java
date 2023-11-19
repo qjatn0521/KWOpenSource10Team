@@ -56,11 +56,18 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
 
     //리스트는 무조건 데이터를 필요로함
     private List<Team> items=new ArrayList<>();
+
+    public TeamAdapter(TeamViewModel viewModel, View loading) {
+        this.viewModel = viewModel;
+        this.loading = loading;
+    }
+
     public void addItem(Team team){
         items.add(team);
     }
     //껍데기만 만듬. 1번 실행
     public TeamViewModel viewModel; // Replace ViewModelType with the actual type of your ViewModel
+    private View loading;
 
 
     // Constructor to accept the ViewModel
@@ -80,7 +87,7 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         Team data=items.get(position);
         try {
-            holder.setItem(data,viewModel);
+            holder.setItem(data,viewModel,loading);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -111,7 +118,7 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
             imageResource=itemView.findViewById(R.id.iv_img_resource);
             switchButton = itemView.findViewById(R.id.switch1);
         }
-        public void setItem(Team data,TeamViewModel viewModel) throws IOException {
+        public void setItem(Team data,TeamViewModel viewModel, View loading) throws IOException {
             tvTitle.setText(data.getName());
             if(data.getSub()) switchButton.setChecked(true);
             //Log.d("sub!",data.getSub()+"");
@@ -119,6 +126,7 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
             switchButton.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    loading.setVisibility(View.VISIBLE);
                     if(isChecked) {
                         출처: https://crazykim2.tistory.com/487 [차근차근 개발일기+일상:티스토리]
                         viewModel.getAllFixtureOfTeam(data.getTeamId());
@@ -160,12 +168,9 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
 
                                             }
                                         } catch (ParseException e) {
-                                            // 날짜 파싱 오류 처리
                                             e.printStackTrace();
                                         }
                                     }
-                                    Log.d("addFixture",data.getName());
-
                                     new InsertFixtureTask().execute(tmp);
                                 }
 
@@ -187,6 +192,12 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
                         }
                         return null;
                     }
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        // doInBackground 작업이 완료된 후에 호출되는 메서드
+                        loading.setVisibility(View.GONE);
+
+                    }
                 }
                 class DeleteFixtureTask extends AsyncTask<Integer, Void, Void> {
                     @Override
@@ -198,8 +209,13 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
                             manager.cancel(data.fixtureId);
                         }
                         fixtureDao.deleteFixturesByTeamId(teamIds[0]);
-                        //Toast.makeText(itemView.getContext(), "데이터가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
                         return null;
+                    }
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        // doInBackground 작업이 완료된 후에 호출되는 메서드
+                        loading.setVisibility(View.GONE);
+
                     }
                 }
             });
@@ -245,6 +261,7 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
             // FixtureDB의 date를 사용하여 다음 알람 시간을 계산
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.KOREA);
             Date date = null;
+            //fixture.date = "2023-11-17T04:35:00Z";
 
             try {
                 date = dateFormat.parse(fixture.date);
@@ -256,6 +273,19 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
             if (date != null) {
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTime(date);
+                calendar.add(Calendar.MINUTE,-30);
+                int year = calendar.get(Calendar.YEAR);
+                int month = calendar.get(Calendar.MONTH) + 1; // 월은 0부터 시작하므로 1을 더해줌
+                int day = calendar.get(Calendar.DAY_OF_MONTH);
+                int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                int minute = calendar.get(Calendar.MINUTE);
+                int second = calendar.get(Calendar.SECOND);
+                int millisecond = calendar.get(Calendar.MILLISECOND);
+
+                // Log에 한 줄에 출력
+                String logMessage = String.format("Time: %04d-%02d-%02d %02d:%02d:%02d.%03d",
+                        year, month, day, hour, minute, second, millisecond);
+                Log.d("CalendarLogExample", logMessage);
                 //Log.d("succe!","suc");
                 return calendar.getTimeInMillis(); // 다음 알람 시간을 밀리초로 반환
             } else {
@@ -268,7 +298,7 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
         private void setNotice(FixtureDB f) {
             //알람을 수신할 수 있도록 하는 리시버로 인텐트 요청
             Intent receiverIntent = new Intent(itemView.getContext(), NotificationReceiver.class);
-            receiverIntent.putExtra("title", f.homeTeamName+" vs"+f.awayTeamName);
+            receiverIntent.putExtra("title", f.homeTeamName+" vs "+f.awayTeamName);
             receiverIntent.putExtra("id", f.fixtureId);
             receiverIntent.putExtra("time",f.timeString);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(itemView.getContext(), f.fixtureId, receiverIntent, PendingIntent.FLAG_IMMUTABLE);
@@ -284,5 +314,3 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
 
     }
 }
-
-

@@ -73,7 +73,7 @@ public class SportsActivity extends AppCompatActivity {
         //팀 정보 얻어오기
 
         viewModel.getAllTeamsOfLeague(leagueId);
-        TeamAdapter adapter =new TeamAdapter(viewModel);
+        TeamAdapter adapter =new TeamAdapter(viewModel,findViewById(R.id.loading_layout));
         RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this);
         viewModel.getTeamsList().observe(this, new Observer<List<Team>>() {
             @Override

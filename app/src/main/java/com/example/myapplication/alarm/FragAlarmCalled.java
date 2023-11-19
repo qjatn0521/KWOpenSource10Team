@@ -1,25 +1,19 @@
 package com.example.myapplication.alarm;
-import static com.example.myapplication.weather.position.TransCoordinate.TO_GRID;
-
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Build;
+import android.os.AsyncTask;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.myapplication.FragNoti;
 import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
 import com.example.myapplication.weather.WeatherActivity;
@@ -32,6 +26,17 @@ import com.example.myapplication.weather.time.CurrentTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import com.example.myapplication.sports.adapter.TodaySchedule;
+import com.example.myapplication.sports.database.FixtureDB;
+import com.example.myapplication.sports.database.FixtureDBDao;
+import com.example.myapplication.sports.database.FixtureDatabase;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 public class FragAlarmCalled extends Activity {
     private LocationManager locationManager;
@@ -40,6 +45,10 @@ public class FragAlarmCalled extends Activity {
     private TransCoordinate trans;
     double longitude;
     double latitude;
+    private TodaySchedule adapter =new TodaySchedule();
+    private  RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this);
+    private RecyclerView sportsRv;
+    private MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +58,6 @@ public class FragAlarmCalled extends Activity {
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-
         Button btnExit = findViewById(R.id.GoOffButton);
         TextView tmp = findViewById(R.id.weatherAlarmTMP);
         TextView reh = findViewById(R.id.weatherAlarmREHText);
@@ -154,13 +162,127 @@ public class FragAlarmCalled extends Activity {
                 }
             }
         }).start();
+        playAlarmSound();
+
+        //알람 다음날 재설정
+        int id = getIntent().getIntExtra("id", 0); // 0 is the default value if "id" is not found
+        String timeValue = getIntent().getStringExtra("time");
+        Intent receiverIntent = new Intent(this, AlarmReceiver.class);
+        receiverIntent.putExtra("id", id);
+        receiverIntent.putExtra("time", timeValue);
+        long alarmTimeMillis = calculateAlarmTime(timeValue);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id, receiverIntent, PendingIntent.FLAG_IMMUTABLE);
+        AlarmManager alarmManager= (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTimeMillis, pendingIntent);
+
+        //시간 설정
+        TextView timeTv = findViewById(R.id.alarm_time_tv);
+        timeTv.setText(convert24HourTo12Hour(timeValue));
+
+
+        //스포츠 일정 불러오기
+        sportsRv = findViewById(R.id.alarm_sports_rv);
+        new QueryDatabaseTask().execute();
+
 
         btnExit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.exit(0);
+
+                stopAlarmSound();
+                finish();
             }
         });
 
+    }
+
+    private long calculateAlarmTime(String alarmTime) {
+        // 현재 시간 계산
+        Calendar calendar = Calendar.getInstance();
+        int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+        int currentMinute = calendar.get(Calendar.MINUTE);
+
+        // 입력된 알람 시간 파싱
+        String[] timeComponents = alarmTime.split(":");
+        int alarmHour = Integer.parseInt(timeComponents[0].replaceAll("[^0-9]", ""));
+        int alarmMinute = Integer.parseInt(timeComponents[1].replaceAll("[^0-9]", ""));
+
+        if (alarmTime.contains("오후") && alarmHour < 12) {
+            alarmHour += 12;
+        }
+
+        // 알람 시간을 밀리초로 변환
+        long alarmTimeMillis = 0;
+        if (alarmHour < currentHour || (alarmHour == currentHour && alarmMinute <= currentMinute)) {
+            // 알람 시간이 현재 시간보다 이전이라면 다음날로 설정
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+        }
+        calendar.set(Calendar.HOUR_OF_DAY, alarmHour);
+        calendar.set(Calendar.MINUTE, alarmMinute);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        alarmTimeMillis = calendar.getTimeInMillis();
+
+        return alarmTimeMillis;
+    }
+    public static String convert24HourTo12Hour(String inputTime) {
+        SimpleDateFormat inputFormat = new SimpleDateFormat("HH:mm",new Locale("ko", "KR"));
+        SimpleDateFormat outputFormat = new SimpleDateFormat("a h:mm", new Locale("ko", "KR"));
+
+        try {
+            Date date = inputFormat.parse(inputTime);
+            if (date != null) {
+                return outputFormat.format(date).replaceAll("AM","오전").replaceAll("PM","오후");
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return ""; // 변환 실패 시 빈 문자열 반환 또는 예외 처리
+    }
+
+    private class QueryDatabaseTask extends AsyncTask<Void, Void, List<FixtureDB>> {
+        @Override
+        protected List<FixtureDB> doInBackground(Void... voids) {
+            // 데이터베이스에서 FixtureDB 정보 가져오기
+            FixtureDBDao fixtureDao = FixtureDatabase.getInstance(FragAlarmCalled.this).fixtureDao();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            // 현재 날짜 및 시간을 가져옵니다.
+            String currentTime = dateFormat.format(new Date());
+            return fixtureDao.getFixturesForToday(currentTime);
+        }
+
+        @Override
+        protected void onPostExecute(List<FixtureDB> fixtures) {
+            // 데이터베이스 쿼리 결과를 처리하고 UI 업데이트
+            if(fixtures!=null&&!fixtures.isEmpty()) {
+                for(FixtureDB data : fixtures) {
+                    adapter.addItem(data);
+                }
+                sportsRv.setLayoutManager(layoutManager);
+                sportsRv.setAdapter(adapter);
+            }
+        }
+    }
+    // 알람 노래를 재생하는 함수
+    private void playAlarmSound() {
+        mediaPlayer = MediaPlayer.create(this, R.raw.alarm_sound); // 알람 소리 파일을 raw 폴더에 넣고 사용
+        mediaPlayer.setLooping(true); // 반복 재생 설정
+        mediaPlayer.start(); // 재생 시작
+    }
+
+    // 알람 노래를 멈추는 함수
+    private void stopAlarmSound() {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop(); // 노래 정지
+            mediaPlayer.release(); // 미디어 플레이어 리소스 해제
+            mediaPlayer = null;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopAlarmSound(); // Activity가 종료될 때 노래 정지 및 리소스 해제
     }
 }
