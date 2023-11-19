@@ -27,6 +27,9 @@ public class UltraSrtNcstAPI{
 
     public UltraSrtNcstAPI(String baseDate, String baseTime, String nx, String ny) {
         this.urlBuilder = new StringBuilder("http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst"); /* 단기예보 URL*/
+        Log.e("UltraSrtNcstAPIParameter", "getBaseUIDate = " + baseDate + ", getBaseUITime = " + baseTime);
+        Log.e("UltraSrtNcstAPIParameter", "nx = " + nx + ", ny = " + ny);
+
 
         try {
             urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + "=" + endKey);
