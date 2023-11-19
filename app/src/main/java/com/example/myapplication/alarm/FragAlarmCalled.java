@@ -1,14 +1,29 @@
 package com.example.myapplication.alarm;
+import static com.example.myapplication.weather.position.TransCoordinate.TO_GRID;
+
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.media.MediaPlayer;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,16 +31,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.FragNoti;
 import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
-import com.example.myapplication.weather.WeatherActivity;
-import com.example.myapplication.weather.api.UltraSrtNcstAPI;
-import com.example.myapplication.weather.api.VillageFcstAPI;
-import com.example.myapplication.weather.position.LatXLngY;
-import com.example.myapplication.weather.position.TransCoordinate;
-import com.example.myapplication.weather.time.CurrentTime;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import com.example.myapplication.sports.adapter.TodaySchedule;
 import com.example.myapplication.sports.database.FixtureDB;
 import com.example.myapplication.sports.database.FixtureDBDao;
@@ -37,18 +42,28 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import com.example.myapplication.weather.WeatherActivity;
+import com.example.myapplication.weather.api.UltraSrtNcstAPI;
+import com.example.myapplication.weather.api.VillageFcstAPI;
+import com.example.myapplication.weather.position.LatXLngY;
+import com.example.myapplication.weather.position.TransCoordinate;
+import com.example.myapplication.weather.time.CurrentTime;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class FragAlarmCalled extends Activity {
+    private TodaySchedule adapter =new TodaySchedule();
+    private  RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this);
+    private RecyclerView sportsRv;
+    private MediaPlayer mediaPlayer;
     private LocationManager locationManager;
     private LocationListener locationListener;
     private CurrentTime currentTime;
     private TransCoordinate trans;
     double longitude;
     double latitude;
-    private TodaySchedule adapter =new TodaySchedule();
-    private  RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this);
-    private RecyclerView sportsRv;
-    private MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +74,28 @@ public class FragAlarmCalled extends Activity {
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         Button btnExit = findViewById(R.id.GoOffButton);
+        playAlarmSound();
+
+        //알람 다음날 재설정
+        int id = getIntent().getIntExtra("id", 0); // 0 is the default value if "id" is not found
+        String timeValue = getIntent().getStringExtra("time");
+        Intent receiverIntent = new Intent(this, AlarmReceiver.class);
+        receiverIntent.putExtra("id", id);
+        receiverIntent.putExtra("time", timeValue);
+        long alarmTimeMillis = calculateAlarmTime(timeValue);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id, receiverIntent, PendingIntent.FLAG_IMMUTABLE);
+        AlarmManager alarmManager= (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTimeMillis, pendingIntent);
+
+        //시간 설정
+        TextView timeTv = findViewById(R.id.alarm_time_tv);
+        timeTv.setText(convert24HourTo12Hour(timeValue));
+
+
+        //스포츠 일정 불러오기
+        sportsRv = findViewById(R.id.alarm_sports_rv);
+        new QueryDatabaseTask().execute();
+
         TextView tmp = findViewById(R.id.weatherAlarmTMP);
         TextView reh = findViewById(R.id.weatherAlarmREHText);
         TextView wsd = findViewById(R.id.weatherAlarmWSDText);
@@ -162,28 +199,6 @@ public class FragAlarmCalled extends Activity {
                 }
             }
         }).start();
-        playAlarmSound();
-
-        //알람 다음날 재설정
-        int id = getIntent().getIntExtra("id", 0); // 0 is the default value if "id" is not found
-        String timeValue = getIntent().getStringExtra("time");
-        Intent receiverIntent = new Intent(this, AlarmReceiver.class);
-        receiverIntent.putExtra("id", id);
-        receiverIntent.putExtra("time", timeValue);
-        long alarmTimeMillis = calculateAlarmTime(timeValue);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id, receiverIntent, PendingIntent.FLAG_IMMUTABLE);
-        AlarmManager alarmManager= (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTimeMillis, pendingIntent);
-
-        //시간 설정
-        TextView timeTv = findViewById(R.id.alarm_time_tv);
-        timeTv.setText(convert24HourTo12Hour(timeValue));
-
-
-        //스포츠 일정 불러오기
-        sportsRv = findViewById(R.id.alarm_sports_rv);
-        new QueryDatabaseTask().execute();
-
 
         btnExit.setOnClickListener(new View.OnClickListener() {
             @Override
