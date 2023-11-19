@@ -30,6 +30,8 @@ public class VillageFcstAPI {
     // API에 맞는 파라미터를 적용하여 URL을 생성하는 함수
     public VillageFcstAPI(String baseDate, String baseTime, String nx, String ny) {
         this.urlBuilder = new StringBuilder("http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst"); /* 단기예보 URL*/
+        Log.e("VillageFcstAPIParameter", "getBaseUIDate = " + baseDate + ", getBaseUITime = " + baseTime);
+        Log.e("VillageFcstAPIParameter", "nx = " + nx + ", ny = " + ny);
 
         try {
             urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + "=" + endKey);
