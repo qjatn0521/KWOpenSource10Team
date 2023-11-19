@@ -178,6 +178,9 @@ public class FragAlarmCalled extends Activity {
                                     else if (PTY.equals("3") || PTY.equals("7")){
                                         skyImage.setImageResource(R.drawable.weather_snow_icon);
                                     }
+                                    else{
+                                        skyImage.setImageResource(R.drawable.weather_cloudy_icon);
+                                    }
                                 }
                                 if (ucg.get(i).equals("T1H")) {
                                     T1H = uob.get(i);
