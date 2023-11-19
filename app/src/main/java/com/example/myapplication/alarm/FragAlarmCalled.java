@@ -94,7 +94,7 @@ public class FragAlarmCalled extends Activity {
 
         //스포츠 일정 불러오기
         sportsRv = findViewById(R.id.alarm_sports_rv);
-        new QueryDatabaseTask().execute();
+        //new QueryDatabaseTask().execute();
 
         TextView tmp = findViewById(R.id.weatherAlarmTMP);
         TextView reh = findViewById(R.id.weatherAlarmREHText);
