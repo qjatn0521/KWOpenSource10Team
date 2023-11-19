@@ -30,8 +30,6 @@ import com.example.myapplication.weather.api.UltraSrtNcstAPI;
 import com.example.myapplication.weather.api.VillageFcstAPI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.util.List;
-
 public class MainActivity extends AppCompatActivity {
 
 
