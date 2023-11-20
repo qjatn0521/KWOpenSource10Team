@@ -3,38 +3,37 @@ package com.example.myapplication.todo.viewModel;
 import android.app.Application;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
+import com.example.myapplication.sports.model.TeamResponse;
 import com.example.myapplication.todo.database.TodoDB;
 
 import java.util.List;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
+
 public class TodoViewModel extends AndroidViewModel {
-    private TodoRepository repository;
-    private LiveData<List<TodoDB>> allTodos;
+    private MutableLiveData<List<TodoDB>> allTodos = new MutableLiveData<>();
+    private final CompositeDisposable disposable = new CompositeDisposable();
+    private final MutableLiveData<Boolean> loadingTodoList = new MutableLiveData<>();
 
     public TodoViewModel(Application application) {
         super(application);
-        repository = new TodoRepository(application);
-        allTodos = repository.getAllTodos();
     }
 
     public LiveData<List<TodoDB>> getAllTodos() {
         return allTodos;
     }
 
-    public void insertFixture(TodoDB todo) {
-        repository.insertFixture(todo);
-    }
-
-    public void insertFixtures(List<TodoDB> todoList) {
-        repository.insertFixtures(todoList);
-    }
-
-    public void deleteOldTodos(String currentTime) {
-        repository.deleteOldTodos(currentTime);
-    }
 
     public void deleteFixture(TodoDB todo) {
-        repository.deleteFixture(todo);
+        deleteFixture(todo);
+    }
+
+    public LiveData<List<TodoDB>> getAllTodosFromRepository() {
+        return getAllTodos();
     }
 }

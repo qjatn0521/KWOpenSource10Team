@@ -5,9 +5,8 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "todos")
 public class TodoDB {
     @PrimaryKey(autoGenerate = true)
-    public int id;
+    public int id = (int) System.currentTimeMillis();
     public boolean checked = false;
-    public String checkedTime;
     public String todoText;
 
 }

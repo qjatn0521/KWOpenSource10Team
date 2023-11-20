@@ -42,6 +42,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import com.example.myapplication.todo.TodoAdapter;
+import com.example.myapplication.todo.database.TodoDB;
+import com.example.myapplication.todo.database.TodoDBDao;
+import com.example.myapplication.todo.database.TodoDatabase;
 import com.example.myapplication.weather.WeatherActivity;
 import com.example.myapplication.weather.api.UltraSrtNcstAPI;
 import com.example.myapplication.weather.api.VillageFcstAPI;
@@ -55,8 +60,10 @@ import java.util.List;
 
 public class FragAlarmCalled extends Activity {
     private TodaySchedule adapter =new TodaySchedule();
+    private TodoAdapter adapter2 = new TodoAdapter(new ArrayList<>());
     private  RecyclerView.LayoutManager layoutManager=new LinearLayoutManager(this);
     private RecyclerView sportsRv;
+    private RecyclerView todosRv;
     private MediaPlayer mediaPlayer;
     private LocationManager locationManager;
     private LocationListener locationListener;
@@ -64,7 +71,9 @@ public class FragAlarmCalled extends Activity {
     private TransCoordinate trans;
     double longitude;
     double latitude;
-
+    private TextView lodingSports;
+    private TextView lodingTodo;
+    private TextView lodingWeather;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,7 +82,10 @@ public class FragAlarmCalled extends Activity {
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-        Button btnExit = findViewById(R.id.GoOffButton);
+        TextView btnExit = findViewById(R.id.GoOffButton);
+        lodingSports = findViewById(R.id.loading_sports);
+        lodingTodo = findViewById(R.id.loading_todo);
+        lodingWeather = findViewById(R.id.loading_weather);
         playAlarmSound();
 
         //알람 다음날 재설정
@@ -94,7 +106,9 @@ public class FragAlarmCalled extends Activity {
 
         //스포츠 일정 불러오기
         sportsRv = findViewById(R.id.alarm_sports_rv);
+        todosRv = findViewById(R.id.alarm_todos_rv);
         new QueryDatabaseTask().execute();
+        new getTodos().execute();
 
         TextView tmp = findViewById(R.id.weatherAlarmTMP);
         TextView reh = findViewById(R.id.weatherAlarmREHText);
@@ -195,6 +209,7 @@ public class FragAlarmCalled extends Activity {
                                     wsd.setText(WSD + "m/s");
                                 }
                             }
+                            lodingWeather.setVisibility(View.GONE);
                         }
                     });
                 } catch (Exception e) {
@@ -258,6 +273,7 @@ public class FragAlarmCalled extends Activity {
 
         return ""; // 변환 실패 시 빈 문자열 반환 또는 예외 처리
     }
+    //스포츠 데이터 가져오기
 
     private class QueryDatabaseTask extends AsyncTask<Void, Void, List<FixtureDB>> {
         @Override
@@ -280,6 +296,30 @@ public class FragAlarmCalled extends Activity {
                 sportsRv.setLayoutManager(layoutManager);
                 sportsRv.setAdapter(adapter);
             }
+            lodingSports.setVisibility(View.GONE);
+        }
+    }
+    private class getTodos extends AsyncTask<Void, Void, List<TodoDB>> {
+        @Override
+        protected List<TodoDB> doInBackground(Void... voids) {
+            // 데이터베이스에서 FixtureDB 정보 가져오기
+            TodoDBDao todoDBDao = TodoDatabase.getInstance(FragAlarmCalled.this).todoDao();
+            // 현재 날짜 및 시간을 가져옵니다.
+            return todoDBDao.getUncheckedTodos();
+        }
+
+        @Override
+        protected void onPostExecute(List<TodoDB> fixtures) {
+            // 데이터베이스 쿼리 결과를 처리하고 UI 업데이트
+            if(fixtures!=null&&!fixtures.isEmpty()) {
+                for(TodoDB data : fixtures) {
+                    adapter2.addItem(data);
+                }
+                LinearLayoutManager layoutManager = new LinearLayoutManager(getBaseContext());
+                todosRv.setLayoutManager(layoutManager);
+                todosRv.setAdapter(adapter2);
+            }
+            lodingTodo.setVisibility(View.GONE);
         }
     }
     // 알람 노래를 재생하는 함수

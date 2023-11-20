@@ -15,7 +15,7 @@ public abstract class TodoDatabase extends RoomDatabase {
     public static synchronized TodoDatabase getInstance(Context context) {
         if (instance == null) {
             instance = Room.databaseBuilder(context.getApplicationContext(),
-                            TodoDatabase.class, "app_database")
+                            TodoDatabase.class, "todo_database")
                     .fallbackToDestructiveMigration()
                     .build();
         }

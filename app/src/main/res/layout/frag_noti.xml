@@ -58,6 +58,12 @@
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:visibility="gone" />
+            <TextView
+                android:id="@+id/loading_sports"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="불러오는 중..."
+                android:gravity="center"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
@@ -69,6 +75,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
@@ -140,6 +147,16 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp" />
         </LinearLayout>
+        <TextView
+            android:id="@+id/loading_todo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="불러오는 중..."
+            android:gravity="center"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 </LinearLayout>
