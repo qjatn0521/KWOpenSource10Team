@@ -288,7 +288,7 @@ public class FragAlarmCalled extends Activity {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             // 현재 날짜 및 시간을 가져옵니다.
             String currentTime = dateFormat.format(new Date());
-            return fixtureDao.getFixturesForToday(currentTime);
+            return fixtureDao.getEarliestFixtureAndSameDateFixtures(currentTime);
         }
 
         @Override

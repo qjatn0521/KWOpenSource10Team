@@ -30,7 +30,7 @@ public interface FixtureDBDao {
     @Query("SELECT * FROM fixtures WHERE date >= :currentDate ORDER BY date LIMIT 1")
     FixtureDB getEarliestFixture(String currentDate);
 
-    @Query("SELECT * FROM fixtures WHERE date = (SELECT MIN(date) FROM fixtures WHERE date >= :currentDate) ORDER BY date")
+    @Query("SELECT * FROM fixtures WHERE dateString = (SELECT MIN(dateString) FROM fixtures WHERE date >= :currentDate) ORDER BY date")
     List<FixtureDB> getEarliestFixtureAndSameDateFixtures(String currentDate);
 
 
