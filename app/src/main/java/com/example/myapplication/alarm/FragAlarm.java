@@ -137,6 +137,7 @@ public class FragAlarm extends Fragment {
         calendar.set(Calendar.HOUR_OF_DAY, alarmHour);
         calendar.set(Calendar.MINUTE, alarmMinute);
         calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
         alarmTimeMillis = calendar.getTimeInMillis();
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH) + 1; // 월은 0부터 시작하므로 1을 더해줌

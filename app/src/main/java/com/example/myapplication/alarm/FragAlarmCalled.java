@@ -25,6 +25,7 @@ import android.widget.TextView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -74,6 +75,8 @@ public class FragAlarmCalled extends Activity {
     private TextView lodingSports;
     private TextView lodingTodo;
     private TextView lodingWeather;
+    private NestedScrollView sportsLy;
+    private NestedScrollView todoLy;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +89,8 @@ public class FragAlarmCalled extends Activity {
         lodingSports = findViewById(R.id.loading_sports);
         lodingTodo = findViewById(R.id.loading_todo);
         lodingWeather = findViewById(R.id.loading_weather);
+        sportsLy = findViewById(R.id.sports_ly);
+        todoLy = findViewById(R.id.todo_ly);
         playAlarmSound();
 
         //알람 다음날 재설정
@@ -295,6 +300,8 @@ public class FragAlarmCalled extends Activity {
                 }
                 sportsRv.setLayoutManager(layoutManager);
                 sportsRv.setAdapter(adapter);
+            } else {
+                sportsLy.setVisibility(View.GONE);
             }
             lodingSports.setVisibility(View.GONE);
         }
@@ -318,6 +325,8 @@ public class FragAlarmCalled extends Activity {
                 LinearLayoutManager layoutManager = new LinearLayoutManager(getBaseContext());
                 todosRv.setLayoutManager(layoutManager);
                 todosRv.setAdapter(adapter2);
+            } else {
+                todoLy.setVisibility(View.GONE);
             }
             lodingTodo.setVisibility(View.GONE);
         }
