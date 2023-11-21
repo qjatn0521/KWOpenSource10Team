@@ -1,21 +1,46 @@
-# Anroid Git Hub 최초 다운로드법
-1. File -> New -> Project from version Control...
-2. URL에 
-https://github.com/qjatn0521/KWOpenSource10Team.git
- 넣고 Clone 버튼 클릭
-# Android 브랜치 생성 (최초 1회만)
-1. Git -> New Branch -> 닉네임 입력후 Create
+<a>
+    <img width="200" src="https://github.com/qjatn0521/KWOpenSource10Team/assets/73988560/963991a6-977b-4c63-ab57-3030902342da"> 
+    
+</a>
 
-# Anroid Git Hub Push 사용법( 파일 올리기 )
-1. 코드 수정...
-2. 오른쪽 위 Git에 있는 Push버튼 클릭
 
-# Anroid Git Hub Update 사용법( 파일 가져오기 )
-1. 오른쪽 위 Git에 있는 Update버튼 클릭
-2. 코드 수정...
-3. Push
+# 소개
+프로젝트를 간단하게 소개하자면 알람으로 지정해둔 시간이 되었을 때 휴대폰이 켜지며 현재 시간과 그날 축구 일정, 날씨정보 그리고 투두 리스트를 알려주는 어플이다. 기존의 알람 어플은 해당 시간만 되면 사용자에게 알려주는 간단한 기능만 가지고 있다. 그런데 보통 알람을 쓰면 잠에서 깰 때 쓰는데 비몽사몽한 상태라 그날 무엇이 있었는데 뭘 해야 했는지 잘 기억이 안 날수 있다. 그래서 가끔 그날 비가 오는 지도 모른 체 집을 나갔다가 우산을 가지러 다시 집으로 돌아간 적이 한번쯤은 있을 것 이다. 혹은 중요한 발표자리에서 갑자기 두고 온 USB가 기억나거나 그날의 중요한 것을 까먹어 난처 했던 적도 있을 것 이다. 이럴 때 필요한 게 바로 “오늘 모지” 어플이다. 
 
-# Anroid Git Hub 다른 branch or master branch 받아오기
-1. Git -> Fetch(브랜치 정보를 얻어옴)
-2. Git -> Pull -> master로 되어있는걸 원하는 branch로 변경-> pull
-3. '기존의 데이터 + 얻어오는 브랜치의 데이터' 가 됨
+# 설치 방법
+https://drive.google.com/file/d/1dCDrjt0LI-sFkXc6r5RaVH2zM-jqN2ha/view?usp=sharing
+
+안드로이드 스튜디오로 해당 어플을 만들었기에 안드로이드 기종 휴대폰으로 해당 링크에서 apk를 받고 다운로드를 하면 된다.
+
+# 기능
+
+주요 기능은 알람이 울릴 때 원하는 정보를 띄울 수 있다는 것이다. 아래의 목록은 알람에서 뜰 수 있는 정보들이다:
+
+- 축구 팀 일정
+- Todo 목록
+- 오늘 날씨 정보
+
+# 사용 방법
+프로그램은 크게 '알람화면', '알림화면' 으로 나뉜다. 알람 화면에서는 알람을 추가 삭제 할 수 있으며 알림 화면에서는 알람이 울릴 때 어떤 정보가 보일지 설정하는 창이다.
+
+<a>
+    <img width="300" src="https://github.com/qjatn0521/KWOpenSource10Team/assets/73988560/28319eae-1d25-499f-a035-4a92f0481377a"> 
+    <img width="300" src="https://github.com/qjatn0521/KWOpenSource10Team/assets/73988560/70fbac44-91df-4a3f-96bf-6573d8bba276"> 
+</a>
+
+알람 화면에서는 알람을 추가 삭제를 할 수 있다. 다만 알람은 시간만 지정할 수 있으며 해당 시간에 알람이 계속 울리게 된다. 추가는 '알람 추가' 버튼을 누르면 시간창이 뜨고 해당 시간을 설정 후 확인을 누르면 되고 삭제는 해당 알람을 클릭 한 후 '알람 삭제'버튼을 클릭하면 된다. 아래의 사진은 알람이 울렸을 때의 화면이며 왼쪽은 그날에 스포츠가 있었을 경우이고 오른쪽은 그날 스포츠 경기가 없는 경우의 화면이다. 
+
+<a>
+    <img width="300" src="https://github.com/qjatn0521/KWOpenSource10Team/assets/73988560/083ff851-6466-466c-9c0e-573343cfbea6"> 
+    <img width="300" src="https://github.com/qjatn0521/KWOpenSource10Team/assets/73988560/faa5e251-f593-4873-ae14-76019d1be0a0"> 
+</a>
+
+알림 화면에서는 스포츠 설정, 투두 설정을 할 수 있다. 스포츠는 EPL축구 팀들이 있으며 원하는 팀을 찾아 구독 버튼을 클릭하면 알람이 울릴 때 그 팀의 경기가 있으면 알려주게 된다. 추가로 경기 시작 30분 전에 알림이 오기도 한다. 투두는 추가는 투두 화면에서만 가능하고 삭제랑 체크는 투두 목록이 보이는 곳에서 다 할 수 있다. 투두 화면에서 원하는 할 일을 쓴 후 투두 추가를 누르면 해당 투두가 추가가 되며 알람이 울릴 때 무슨일이 있는지 알려주게 된다. 
+
+<a>
+    <img width="300" src="https://github.com/qjatn0521/KWOpenSource10Team/assets/73988560/3ed8c998-3e92-4c62-8a5c-90c6a86850f0"> 
+    <img width="300" src="https://github.com/qjatn0521/KWOpenSource10Team/assets/73988560/4770db8e-adc6-4ee3-853f-701dad6fe973"> 
+</a>
+
+# License
+MIT License
