@@ -1,6 +1,8 @@
 package com.example.myapplication.alarm;
 import static com.example.myapplication.weather.position.TransCoordinate.TO_GRID;
 
+import static java.lang.Thread.sleep;
+
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -37,6 +39,7 @@ import com.example.myapplication.sports.database.FixtureDB;
 import com.example.myapplication.sports.database.FixtureDBDao;
 import com.example.myapplication.sports.database.FixtureDatabase;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -165,7 +168,6 @@ public class FragAlarmCalled extends Activity {
 
         UltraSrtNcstAPI ulweather = new UltraSrtNcstAPI(currentTime.getBaseUlDate(), currentTime.getBaseUlTime(), nx, ny);
 
-        /** API를 받아오는 Thread */
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -231,7 +233,6 @@ public class FragAlarmCalled extends Activity {
                 finish();
             }
         });
-
     }
 
     private long calculateAlarmTime(String alarmTime) {
@@ -288,7 +289,7 @@ public class FragAlarmCalled extends Activity {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             // 현재 날짜 및 시간을 가져옵니다.
             String currentTime = dateFormat.format(new Date());
-            return fixtureDao.getEarliestFixtureAndSameDateFixtures(currentTime);
+            return fixtureDao.getFixturesForToday(currentTime);
         }
 
         @Override
