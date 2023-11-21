@@ -166,6 +166,72 @@ public class FragAlarmCalled extends Activity {
         UltraSrtNcstAPI ulweather = new UltraSrtNcstAPI(currentTime.getBaseUlDate(), currentTime.getBaseUlTime(), nx, ny);
 
         /** API를 받아오는 Thread */
+        Thread workingThread = new Thread() {
+            public void run(){
+                try {
+                    ulweather.getAPI();
+
+                    // 초단기실황
+                    List<String> ucg = ulweather.getCategory();
+                    List<String> uob = ulweather.getObsrValue();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // 초단기실황 데이터
+                            String T1H, RN1, REH, PTY, VEC, WSD;
+                            List<Integer> TmpList = new ArrayList<>();
+
+                            for (int i = 0; i < ucg.size(); i++) {
+                                // 초단기실황에서 기온
+                                if (ucg.get(i).equals("PTY")) {
+                                    PTY = uob.get(i);
+
+                                    if (PTY.equals("0")){
+                                        skyImage.setImageResource(R.drawable.weather_sunny_icon);
+                                    }
+                                    else if (PTY.equals("1")|| PTY.equals("2") || PTY.equals("5") || PTY.equals("6")){
+                                        skyImage.setImageResource(R.drawable.weather_rain_icon);
+                                    }
+                                    else if (PTY.equals("3") || PTY.equals("7")){
+                                        skyImage.setImageResource(R.drawable.weather_snow_icon);
+                                    }
+                                    else{
+                                        skyImage.setImageResource(R.drawable.weather_cloudy_icon);
+                                    }
+                                }
+                                if (ucg.get(i).equals("T1H")) {
+                                    T1H = uob.get(i);
+                                    tmp.setText(T1H + "℃");
+                                }
+                                if (ucg.get(i).equals("REH")) {
+                                    REH = uob.get(i);
+                                    reh.setText(REH + "%");
+                                }
+                                if (ucg.get(i).equals("WSD")) {
+                                    WSD = uob.get(i);
+                                    wsd.setText(WSD + "m/s");
+                                }
+                            }
+                            lodingWeather.setVisibility(View.GONE);
+                        }
+                    });
+                } catch (Exception e) {
+                    System.out.println("onCreateThread = " + e);
+                }
+            }
+        };
+
+        workingThread.start();
+
+        try{
+            workingThread.join();
+        }
+        catch (InterruptedException e){
+            e.printStackTrace();
+        }
+
+        /*
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -222,6 +288,8 @@ public class FragAlarmCalled extends Activity {
                 }
             }
         }).start();
+
+         */
 
         btnExit.setOnClickListener(new View.OnClickListener() {
             @Override
