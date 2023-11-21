@@ -1,13 +1,20 @@
 package com.example.myapplication;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
 
@@ -21,17 +28,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-public class SplashActivity extends AppCompatActivity {
-    private static SplashActivity instance;
-
-    public static ViewModelStoreOwner getInstance() {
-        return instance;
-    }
-
+public class SplashActivity extends Activity {
     @Override
     protected void onCreate(Bundle sa) {
         super.onCreate(sa);
-        instance = this;
         setContentView(R.layout.activity_splash);
 
         ImageView loadingIv = findViewById(R.id.splash1);
@@ -41,6 +41,7 @@ public class SplashActivity extends AppCompatActivity {
         Glide.with(this).load(R.drawable.splash_gif_icon).into(gifImage);
         Glide.with(this).load(R.drawable.splash_gif_text).into(gifImage2);
         Handler handler = new Handler();
+
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -52,4 +53,5 @@ public class SplashActivity extends AppCompatActivity {
 
 
     }
+
 }

@@ -1,6 +1,8 @@
 package com.example.myapplication.alarm;
 
+import android.Manifest;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.icu.text.SimpleDateFormat;
 import android.net.ParseException;
 import android.os.Bundle;
@@ -19,6 +21,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import java.lang.reflect.Type;
@@ -28,6 +32,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+
+import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -215,6 +221,7 @@ public class FragAlarm extends Fragment {
 
         setOnClickListeners();
         updateAlarmList();
+
     }
 
     private void addAlarm(String alarmTime) {
