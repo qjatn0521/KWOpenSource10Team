@@ -16,7 +16,7 @@ public class CurrentTime {
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     public CurrentTime() {
-        currentDateTime = LocalDateTime.now();
+        currentDateTime = LocalDateTime.now().minusHours(1);
         currentDate = currentDateTime.toLocalDate();
         baseUlTime = changeTimeInUltra(currentDateTime.getHour());
         baseUlDate = currentDate.format(dateFormatter);
