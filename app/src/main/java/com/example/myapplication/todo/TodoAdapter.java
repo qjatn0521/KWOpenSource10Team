@@ -28,6 +28,7 @@ import java.util.List;
 public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.ViewHolder> {
 
     private ArrayList<TodoDB> todoList;
+    private boolean noCLick;
 
 
     ////할 일 목록 배열로 전달
@@ -49,6 +50,10 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.ViewHolder> {
         String task = todoList.get(position).todoText;
         holder.taskTextView.setText(task);
         holder.checkBox.setChecked(todoList.get(position).checked);
+        if(noCLick) {
+            holder.removeBtn.setVisibility(View.GONE);
+        }
+
         holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -77,6 +82,7 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.ViewHolder> {
                     TodoDBDao todoDBDao = TodoDatabase.getInstance(holder.itemView.getContext()).todoDao();
                     todoDBDao.deleteFixture(todoList.get(position));
                     todoList.remove(position);
+
                     return null;
                 }
                 @Override
@@ -95,6 +101,10 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.ViewHolder> {
     }
 
     public void addItem(TodoDB data) {todoList.add(data);
+    }
+
+    public void setNoClick() {
+        noCLick = true;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

@@ -387,6 +387,7 @@ public class FragAlarmCalled extends Activity {
         protected void onPostExecute(List<TodoDB> fixtures) {
             // 데이터베이스 쿼리 결과를 처리하고 UI 업데이트
             if(fixtures!=null&&!fixtures.isEmpty()) {
+                adapter2.setNoClick();
                 for(TodoDB data : fixtures) {
                     adapter2.addItem(data);
                 }

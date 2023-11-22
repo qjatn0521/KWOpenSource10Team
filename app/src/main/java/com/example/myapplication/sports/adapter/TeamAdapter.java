@@ -137,6 +137,7 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
                                     ArrayList<FixtureDB> tmp = new ArrayList<>();
                                     alarmManager = (AlarmManager)itemView.getContext().getSystemService(Context.ALARM_SERVICE);
                                     String channelId = "my_channel_id";
+                                    int i=0;
                                     for(Fixture f : fixtures) {
                                         try {
                                             // 일자 문자열을 파싱
@@ -161,12 +162,20 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
                                                 fixture.homeTeamName = f.getHomeTeam().getTeamName();
                                                 fixture.homeTeamlogo = f.getHomeTeam().getLogo();
                                                 fixture.awayTeamlogo = f.getAwayTeam().getLogo();
-                                                fixture.fixtureId = f.getFixtureİd();
+                                                fixture.fixtureId = f.getFixtureİd();/*
+                                                if(i==0) {
+                                                    fixture.date = "2023-11-21T22:50:00+09:00";
+                                                    fixture.dateString = "2023-11-21";
+                                                    fixture.timeString = "22:50";
+                                                }*/
+
                                                 tmp.add(fixture);
+
                                                 setNotice(fixture);
                                                 //fixtureDao.insertFixture(fixture);
-
+                                                i++;
                                             }
+
                                         } catch (ParseException e) {
                                             e.printStackTrace();
                                         }

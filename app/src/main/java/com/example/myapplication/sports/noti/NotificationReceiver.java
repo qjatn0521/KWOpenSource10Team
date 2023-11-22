@@ -53,7 +53,6 @@ public class NotificationReceiver extends BroadcastReceiver {
         builder.setContentTitle(titleValue) //회의명노출
             .setContentText(timeValue) //회의 내용
             .setSound(null)
-        //알림창 아이콘
             .setSmallIcon(R.drawable.image_sprots_soccerball)
         //알림창 터치시 자동 삭제
             .setAutoCancel(true);

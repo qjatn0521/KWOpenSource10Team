@@ -45,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
     private FragmentManager fragmentManager;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
     private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 1004;
+    private static final int NOTIFICATION_PERMISSION_REQUEST_CODE2 = 1020;
+    private final int MULTIPLE_PERMISSIONS = 1023;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +79,11 @@ public class MainActivity extends AppCompatActivity {
                 return loadFragment(fragment);
             }
         });
-        checkLocationPermission();
+        //checkNotiPermission();
+        //checkLocationPermission();
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.POST_NOTIFICATIONS},
+                MULTIPLE_PERMISSIONS);
         runtimeCheckPermission();
         if (PermissionUtils.hasSystemAlertWindowPermission(this)) {
             // 권한이 이미 부여되어 있음
@@ -86,6 +92,8 @@ public class MainActivity extends AppCompatActivity {
             // 권한이 부여되지 않았으므로 요청
             PermissionUtils.requestSystemAlertWindowPermission(this);
         }
+
+
     }
 
     private boolean loadFragment(Fragment fragment) {
@@ -105,6 +113,18 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     LOCATION_PERMISSION_REQUEST_CODE);
+        } else {
+            // 권한이 이미 있는 경우 처리할 내용
+            // 예: 위치 정보 가져오기 등의 작업 수행
+        }
+    }
+    private void checkNotiPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            // 권한이 없을 경우 권한 요청
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                    NOTIFICATION_PERMISSION_REQUEST_CODE2);
         } else {
             // 권한이 이미 있는 경우 처리할 내용
             // 예: 위치 정보 가져오기 등의 작업 수행
