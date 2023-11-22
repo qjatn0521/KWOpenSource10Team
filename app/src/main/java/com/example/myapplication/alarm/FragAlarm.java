@@ -1,6 +1,7 @@
 package com.example.myapplication.alarm;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.icu.text.SimpleDateFormat;
@@ -158,6 +159,11 @@ public class FragAlarm extends Fragment {
                 year, month, day, hour, minute, second, millisecond);
         Log.d("CalendarLogExample22", logMessage);
 
+        SimpleDateFormat logFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault());
+        String logCurrentTime = logFormat.format(System.currentTimeMillis());
+        String logAlarmTime = logFormat.format(calendar.getTimeInMillis());
+        Log.d("AlarmTimeCalculator", "Current Time: " + logCurrentTime);
+        Log.d("AlarmTimeCalculator", "Alarm Time: " + logAlarmTime);
         return alarmTimeMillis;
     }
 
@@ -224,6 +230,7 @@ public class FragAlarm extends Fragment {
 
     }
 
+    @SuppressLint("ScheduleExactAlarm")
     private void addAlarm(String alarmTime) {
         Alarm a = new Alarm(alarmTime);
         alarms.add(a);
@@ -239,7 +246,17 @@ public class FragAlarm extends Fragment {
         //Log.d("add ID", a.getAlarmId()+"");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), a.getAlarmId(), receiverIntent, PendingIntent.FLAG_IMMUTABLE);
 
-        alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTimeMillis, pendingIntent);
+        //alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTimeMillis, pendingIntent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Android M (6.0, API level 23) 이상에서는 setExactAndAllowWhileIdle을 사용
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTimeMillis, pendingIntent);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            // Android KITKAT (4.4, API level 19) 이상에서는 setExact을 사용
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmTimeMillis, pendingIntent);
+        } else {
+            // 이전 버전에서는 set을 사용
+            alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTimeMillis, pendingIntent);
+        }
     }
 
     private void checkAlarms() {

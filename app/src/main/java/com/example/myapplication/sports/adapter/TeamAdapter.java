@@ -1,6 +1,7 @@
 package com.example.myapplication.sports.adapter;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
@@ -304,6 +305,7 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
 
             }
         }
+        @SuppressLint("ScheduleExactAlarm")
         private void setNotice(FixtureDB f) {
             //알람을 수신할 수 있도록 하는 리시버로 인텐트 요청
             Intent receiverIntent = new Intent(itemView.getContext(), NotificationReceiver.class);
@@ -317,8 +319,17 @@ public class TeamAdapter  extends RecyclerView.Adapter<TeamAdapter.MyViewHolder>
             //param 3)알람이 울릴 때 수행할 작업을 나타냄
             long time = calculateNextAlarmTime(f);
             Log.d("timeSet",time+"");
-            alarmManager.set(AlarmManager.RTC, time, pendingIntent);
-
+            //alarmManager.set(AlarmManager.RTC, time, pendingIntent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                // Android M (6.0, API level 23) 이상에서는 setExactAndAllowWhileIdle을 사용
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC, time, pendingIntent);
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                // Android KITKAT (4.4, API level 19) 이상에서는 setExact을 사용
+                alarmManager.setExact(AlarmManager.RTC, time, pendingIntent);
+            } else {
+                // 이전 버전에서는 set을 사용
+                alarmManager.set(AlarmManager.RTC, time, pendingIntent);
+            }
         }
 
     }
