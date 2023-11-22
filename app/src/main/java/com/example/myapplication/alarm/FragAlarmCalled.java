@@ -166,6 +166,7 @@ public class FragAlarmCalled extends Activity {
         UltraSrtNcstAPI ulweather = new UltraSrtNcstAPI(currentTime.getBaseUlDate(), currentTime.getBaseUlTime(), nx, ny);
 
         /** API를 받아오는 Thread */
+        /*
         Thread workingThread = new Thread() {
             public void run(){
                 try {
@@ -231,7 +232,8 @@ public class FragAlarmCalled extends Activity {
             e.printStackTrace();
         }
 
-        /*
+         */
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -289,8 +291,6 @@ public class FragAlarmCalled extends Activity {
             }
         }).start();
 
-         */
-
         btnExit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -299,7 +299,6 @@ public class FragAlarmCalled extends Activity {
                 finish();
             }
         });
-
     }
 
     private long calculateAlarmTime(String alarmTime) {
